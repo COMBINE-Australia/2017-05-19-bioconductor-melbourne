@@ -1,4 +1,6 @@
 
+# Install packages
+
 source("http://www.bioconductor.org/biocLite.R")
 biocLite(c(
     "GenomicRanges",
@@ -7,12 +9,27 @@ biocLite(c(
     "BSgenome.Scerevisiae.UCSC.sacCer3",
     "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"))
 
+
+# Load packages
+
 library(GenomicRanges)
 library(Biostrings)
 library(BSgenome)
 
+# Bioconductor packages usually have documentation in the form of "vignettes".
+# These are also available on the Bioconductor website.
+vignette()
+vignette(package="Biostrings")
+vignette("BiostringsQuickOverview")
+browseVignettes(package="Biostrings")
+
 # ==============================================================================
 # DNA sequences
+
+myseq <- DNAString("ACGT")
+
+class(myseq)
+methods(class="DNAString")
 
 
 # Challenge
@@ -103,6 +120,7 @@ cds_list <- cdsBy(txdb, "tx", use.names=TRUE)
 
 cds_list
 class(cds_list)
+lengths(cds_list)
 table( lengths(cds_list) )
 cds_list[ lengths(cds_list) >= 2 ]
 
