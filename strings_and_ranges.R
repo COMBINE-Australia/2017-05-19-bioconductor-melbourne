@@ -152,9 +152,27 @@ table(start_seqs)
 # Use split() to perform the splitting step manually.
 
 
+# The approach above has a potential flaw:
+# An intron may lie within the start codon.
+
+# An alternative way to get start codons
+cds_seqs <- extractTranscriptSeqs(genome, cds_list)
+table( subseq(cds_seqs, 1, 3) )
+
+# It really happens!
+cds_list[ start_seqs == "AGC" ]
+cds_list[ start_seqs == "AGT" ]
+
+
+# ==============================================================================
+# Reading and writing files with rtracklayer
+
 library(rtracklayer)
+
 export(cds_ranges, "cds_ranges.gff3")
 export(start_codons, "start_codons.gff3")
+
+import("cds_ranges.gff3")
 
 # Examine these files in IGV
 # https://software.broadinstitute.org/software/igv/download
@@ -163,8 +181,11 @@ export(start_codons, "start_codons.gff3")
 # File/Load from file... to load GFF files.
 # YBR111W-A has introns, check we have handled this correctly.
 
-# See also rtracklayer::import() to load many file formats.
-import("cds_ranges.gff3")
 
+# rtracklayer can also read and write sequences in FASTA format.
+# (alternatively use Biostrings::writeXStringSet, Biostrings::readDNAStringSet)
+export(start_seqs, "start_codons.fasta")
+
+import("start_codons.fasta", type="DNA")
 
 
