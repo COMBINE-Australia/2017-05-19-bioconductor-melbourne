@@ -1,0 +1,53 @@
+---
+title: "An intorduction to Bioconductor and it's data structures"
+author: "Soroor Hediyeh-Zadeh"
+output: html_document
+---
+
+
+
+## Installing Bioconductor packages
+
+Two possible ways to download a package from Bioconductor:
+
+- `source()` the Bioconductor R script
+- `biocInstaller::biocLite()`
+
+
+## S4 classes and help documentation
+
+## Data Structures
+
+### The three tables
+
+- There are 3 tables in bioinformatics: the gene expression matrix, sample descriptions and gene annotation
+- `ExpressionSet` objects and `SummarizedExperiment` objects are data structures that store these 3 tables all in one place. This ensures consistency. 
+- Also, some functions in Bioconductor only operate on objects of specific type/class
+
+![The 3 tables in Bioinformatics](nmeth.3252-F2.jpg)
+
+#### The ExpressionSet Objects
+- Used to store continuous measurments such as microarray data
+- Use `exprs()` to extract the gene expression matrix. The rows in the matrix represent genes and the columns are the samples
+- `pData()` returns **p**henotype **data** i.e. the sample description table
+- `fData()` stands for **f**eature **data** and returns the annotation of the genes in the gene expression matrix
+
+```{r}
+#demo goes here
+
+```
+
+#### RangedSummarizedExperiment Objects
+- Used to store count data such as RNA-Seq ( but also ChIP-Seq)
+- `assays()` returns the count matrix. Rows are genes, columns are samples
+- Use `colData()` to get the sample descriptions and `rowData()` to retrieve gene annotation
+- unlike an ExpressionSet object you can store more than one count matrix in a RangedSummarizedExperiment object (e.g. you can keep both gene expression measures and methylation measures in one object). Use `assayNames()` to see the names of count matrices stored in the object.
+- You can also get the genomic coordinates of the features in the count matrix using `rowRanges()`. This returns a `GRangesList` or a `GRanges`object
+
+
+
+```{r}
+#demo goes here
+
+```
+
