@@ -6,7 +6,7 @@ output: html_document
 
 
 
-## Installing Bioconductor packages
+### Installing Bioconductor packages
 
 Two possible ways to download a package from Bioconductor:
 
@@ -14,11 +14,11 @@ Two possible ways to download a package from Bioconductor:
 - `biocInstaller::biocLite()`
 
 
-## S4 classes and help documentation
+### S4 classes and help documentation
 
 ## Data Structures
 
-### The three tables
+#### The three tables
 
 - There are 3 tables in bioinformatics: the gene expression matrix, sample descriptions and gene annotation
 - `ExpressionSet` objects and `SummarizedExperiment` objects are data structures that store these 3 tables all in one place. This ensures consistency. 
@@ -29,25 +29,194 @@ Two possible ways to download a package from Bioconductor:
 #### The ExpressionSet Objects
 - Used to store continuous measurments such as microarray data
 - Use `exprs()` to extract the gene expression matrix. The rows in the matrix represent genes and the columns are the samples
-- `pData()` returns **p**henotype **data** i.e. the sample description table
+- `pData()` returns **p**henotype **data** i.e. the sample description table . You can extract each column in the sample description table using the usual `$` that you would use to subset a data frame
 - `fData()` stands for **f**eature **data** and returns the annotation of the genes in the gene expression matrix
+- See `?ExpressionSet` if you want to create your own ExpressionSet object
 
 ```{r}
-#demo goes here
+library(Biobase)
+library(ALL)
+library(hgu95av2.db) # probe annotation for the Affymatrix chip
 
+# or install the packages if you already haven't
+
+# source("http://www.bioconductor.org/biocLite.R")
+# biocLite(c("Biobase", "ALL", "hgu95av2.db"))
+
+data(ALL)
+ALL
+
+# help documentation for ALL data
+?ALL
+experimentData(ALL)
+
+# extract/explore the gene expression matrix
+exprs(ALL)[1:4, 1:4]
+head(sampleNames(ALL))
+head(featureNames(ALL))
+
+# get the phenotype/sample data table
+head(pData(ALL))
+
+head(pData(ALL)$sex)
+head(ALL$sex)
+
+
+# subsetting
+ALL[,1:5]
+ALL[1:10,]
+ALL[, c(3,2,1)]
+ALL$sex[c(1,2,3)]
+
+# the gene annotation data
+head(fData(ALL))
+
+# find the Entrez IDs for the probes in the chip
+library(hgu95av2.db)
+
+ids <- featureNames(ALL)[1:5]
+ids
+as.list(hgu95av2ENTREZID[ids])
 ```
 
 #### RangedSummarizedExperiment Objects
 - Used to store count data such as RNA-Seq ( but also ChIP-Seq)
 - `assays()` returns the count matrix. Rows are genes, columns are samples
 - Use `colData()` to get the sample descriptions and `rowData()` to retrieve gene annotation
+- You can extract each column in the sample description table using the usual `$` that you would use to subset a data frame
 - unlike an ExpressionSet object you can store more than one count matrix in a RangedSummarizedExperiment object (e.g. you can keep both gene expression measures and methylation measures in one object). Use `assayNames()` to see the names of count matrices stored in the object.
 - You can also get the genomic coordinates of the features in the count matrix using `rowRanges()`. This returns a `GRangesList` or a `GRanges`object
+- See `?SummarizedExperiment` if you want to create your own SummarizedExperiment object
 
 
 
 ```{r}
-#demo goes here
+library(SummarizedExperiment)
+library(GenomicRanges)
+library(airway)
+
+# or install using biocLite()
+# source("http://www.bioconductor.org/biocLite.R")
+# biocLite(c("SummarizedExperiment", "GenomicRanges", "airway"))
+
+data(airway)
+airway
+
+# what assays/count matrices are available
+assayNames(airway)
+
+# extract the count data
+head(assay(airway, "counts")) 
+head(assay(airway))
+
+dim(airway)
+
+
+# the sample information table
+head(colData(airway))
+
+# use $ to get a specific column
+head(airway$cell)
+
+
+head(colnames(airway))
+head(rownames(airway))
+
+# get the genomic coordinates of the features
+rowRanges(airway)
 
 ```
 
+
+# Annotation packages
+
+3 types of annotation packages:
+
+- `BSgenome` packages that are named in the form of **BSgenome.organism.provider.genomeVersion** that contain the actual DNA sequence e.g. `BSgenome.Hsapiens.UCSC.hg38`
+- `TxDb` packages that contain gene models and are named in the form of **TxDb.organism.provider.genomeVersion.type ** e.g. `TxDb.Dmelanogaster.UCSC.dm6.ensGene`
+- `orgDb` packages that provide different gene annotations for any given species such as `org.Mm.eg.db`. These are the most useful packages when one is interested in ID conversion i.e. ENSEMBL to ENTREZ Ids . These packages start with **org**
+
+In this section we explore the **orgDb** packages.
+
+- load a `org.xx.xx.db` object
+- use `columns()` to see what are the available columns to select from. Each column is an annotation database here that we can make query on
+- use `keys()` to see what keys are available to make yor query on (i.e the values that we can use to make queries on the the available column)
+- use `select()` to extract the information in a column or multiple columns usings the values (i.e keys) that you have.
+
+Lets apply these functions to convert the Ensembl ids in the `airway` data to their corresponding EntrezIDs. To do this, we first need to load the `org.Hs.eg.db` package and explore the information that it contains.
+```{r}
+# biocInstalled::biocLite("org.Hs.eg.db")
+
+library(org.Hs.eg.db)
+
+# values that you can use to make queries on the org.Hs.eg.db object
+keys <- keytypes(org.Hs.eg.db)
+head(keys, n = 30)
+
+# the available annotations
+columns(org.Hs.eg.db)
+```
+
+Lets convert the Ensembl Ids in the airway data to their Entrez Ids
+
+```{r}
+head(rownames(airway))
+ensembl_to_entrez <- select(org.Hs.eg.db, keys = as.character(rownames(airway)), columns= "ENTREZID", keytype="ENSEMBL")
+
+head(ensembl_to_entrez)
+```
+
+#### > Challenge
+
+> find the gene symbols and gene descriptions (names) for the airway data
+
+#### > Challenge
+
+> Find the symbol of the gene with Ensembl ID "ENSG00000000005" and all the aliases associated with that genes. How many transcripts are recorded for this gene in ENSEMBL Transcript database?
+
+
+# GEOquery
+
+- We all use public data in Bioinformatics
+- One of the most pouplar database for downloading the public data that comes with the publications is the NCBI Gene Expression Omnibus (GEO)
+- **Raw** versus **processed** data in bioinformatics
+- In this section we will learn how to access a GEO dataset (processed data) directly from within R
+- We use the `GEOquery` package in Bioconductor
+- All you need to download data from GEO is the accession number. Let us use GSE11675 which is a
+very small scale Affymetrix gene expression array study (6 samples).
+- The main functions to remember are `getGEO()` to retrieve the main files and `getGEOSuppFiles()` to retrieve the supplementary data
+
+```{r}
+
+# source("http://www.bioconductor.org/biocLite.R")
+# biocLite(c("GEOquery"))
+
+library(GEOquery)
+
+eList <- getGEO("GSE11675")
+
+class(eList)
+
+length(eList)
+
+names(eList)
+
+eData <- eList[[1]]
+eData
+
+
+names(pData(eData))
+
+eList2 <- getGEOSuppFiles("GSE11675")
+rownames(eList2) <- basename(rownames(eList2))
+
+eList2
+```
+
+This is now a data.frame of file names. A single TAR archive was downloaded. You can expand the
+TAR achive using standard tools; inside there is a list of 6 CEL files and 6 CHP files. You can then
+read the 6 CEL files into R using functions from affy or oligo.
+
+
+It is also possible to use GEOquery to query GEO as a database (ie. looking for datasets); more
+information in the package vignette.
