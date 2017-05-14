@@ -1,5 +1,27 @@
+#
+# Contents
+# ========
+#
+# Installing Bioconductor packages
+#
+# Loading packages
+#
+# Finding documentation
+#
+# IRanges
+#
+# GRanges
+#
+# DNAString and DNAStringSet
+#
+# BSGenome and TxDb packages
+#
+# Reading and writing files with rtracklayer
+#
 
-# Install packages
+
+# ==============================================================================
+# Installing Bioconductor packages
 
 source("http://www.bioconductor.org/biocLite.R")
 biocLite(c(
@@ -10,11 +32,18 @@ biocLite(c(
     "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"))
 
 
-# Load packages
+
+# ==============================================================================
+# Loading packages
 
 library(GenomicRanges)
 library(Biostrings)
 library(BSgenome)
+
+
+
+# ==============================================================================
+# Finding documentation
 
 # Bioconductor packages usually have documentation in the form of "vignettes".
 # These are also available on the Bioconductor website.
@@ -23,67 +52,205 @@ vignette(package="Biostrings")
 vignette("BiostringsQuickOverview")
 browseVignettes(package="Biostrings")
 
+
+
 # ==============================================================================
-# DNA sequences
+# IRanges
+#
+# Integer ranges, 1-based, from start to end inclusive.
+#
+# This is R, everything is a vector.
+# There is no singular IRange, only plural IRanges.
 
-myseq <- DNAString("ACGT")
+myiranges <- IRanges(start=c(5,20,25), end=c(10,30,40))
 
+myiranges
+class(myiranges)
+methods(class="IRanges")
+
+start(myiranges)
+end(myiranges)
+width(myiranges)
+
+# IRanges support many operations
+resize(myiranges, 3, fix="start")
+resize(myiranges, 3, fix="end")
+#...
+
+# Ok, this gets confusing, let me illustrate...
+show_iranges <- function(obj) {
+    for(i in seq_along(obj))
+        cat(rep(" ", start(obj)[i]),
+            rep("=", width(obj)[i]),
+            "\n", sep="")
+}
+
+show_iranges( myiranges                              )
+
+show_iranges( resize(myiranges, 3, fix="start")      )
+show_iranges( resize(myiranges, 3, fix="end")        )
+
+show_iranges( flank(myiranges, 2, start=TRUE)        )
+show_iranges( flank(myiranges, 2, start=FALSE)       )
+
+show_iranges( range(myiranges) )
+show_iranges( setdiff(range(myiranges), myiranges)   )
+show_iranges( reduce(myiranges)                      )
+show_iranges( disjoin(myiranges)                     )
+show_iranges( intersect(myiranges[2], myiranges[3])  )
+show_iranges( union(myiranges[2], myiranges[3])      )
+
+?"intra-range-methods"
+?"inter-range-methods"
+?"setops-methods"
+?"findOverlaps-methods"
+?"nearest-methods"
+
+# Note:
+# Loading tidyverse packages may clobber some of these generic functions.
+# If necessary use IRanges::setdiff, etc.
+
+
+# Challenge
+
+
+
+# ==============================================================================
+# GRanges
+#
+# To refer to a location in a genome we also need
+# - sequence name (chromosome)
+# - strand, + or -
+#
+
+mygranges <- GRanges(
+    seqnames = c("chrII", "chrI", "chrI"),
+    ranges = IRanges(start=c(5,20,25), end=c(10,30,40)),
+    strand = c("+", "-", "+"))
+
+mygranges
+class(mygranges)
+methods(class="GRanges")
+
+
+seqnames(mygranges)
+strand(mygranges)
+ranges(mygranges)
+start(mygranges)
+end(mygranges)
+as.data.frame(mygranges)
+
+
+# GRanges are like vectors:
+mygranges[2]
+c(mygranges, mygranges)
+
+# Like other vectors, elements may be named
+names(mygranges) <- c("foo", "bar", "baz")
+mygranges
+
+# GRanges can have metadata columns, so they are also a little like data frames:
+mygranges$wobble <- c(10, 20, 30)
+mygranges
+mcols(mygranges)
+mygranges$wobble
+
+# A handy way to create a GRanges
+as("chrI:3-5:+", "GRanges")
+
+
+# Operations on GRanges
+#
+# All the operations we saw for IRanges are available for GRanges
+#
+# With GRanges it is often important to take strand into account.
+#
+
+resize(mygranges, 3, fix="start")
+resize(mygranges, 3, fix="end")
+
+# Note:
+# Loading tidyverse packages may clobber some of these generic functions.
+# If necessary use GenomicRanges::setdiff, etc.
+
+
+# Challenge
+
+
+
+# ==============================================================================
+# DNAString and DNAStringSet
+
+myseq <- DNAString("gcgctgctggatgcgaccgcgcatgcgagcgcgacctatccggaa")
+
+myseq
 class(myseq)
 methods(class="DNAString")
 
+reverseComplement(myseq)
+translate(myseq)
+
+# DNAString objects behave like vectors.
+subseq(myseq, 3,5)
+myseq[3:5]
+c(myseq, myseq)
+
+# as() converts between types.
+as(myseq, "character")
+as("ACGT", "DNAString")
+
+# We often want to work with a collection of DNA sequences
+myset <- DNAStringSet(list(chrI=myseq, chrII=DNAString("ACGTACGTAA")))
+
+myset
+class(myset)
+lengths(myset)
+seqinfo(myset)
+
+# Since a DNAString is like a vector, a DNAStringSet is has to be like a list.
+myset$chrII
+# or myset[["chrII"]]
+# or myset[[2]]
+
+# Getting sequences with GRanges
+getSeq(myset, mygranges)
+
+getSeq(myset, as("chrI:1-3:+", "GRanges"))
+getSeq(myset, as("chrI:1-3:-", "GRanges"))
+# Performs reverse complement if strand is "-".
+
+# GRanges can also have seqinfo, allowing various forms of error checking.
+
 
 # Challenge
-
-# ==============================================================================
-# Genomic ranges
-
-
-
-# Challenge
-
-# Operations on GRanges
-
-# Challenge
-
-# ==============================================================================
-# Rle weirdness
+# ---------
 #
-# Bioconductor sometimes likes to use Run-Length Encoded (RLE) vectors.
-# This saves memory when there are long runs of the same value in a vector.
-# These *mostly* behave like normal R vectors.
+# Reverse complement the following DNA sequence and then translate to an 
+# amino acid sequence:
+# 
+# TTCCATTTCCAT
 #
-# If not, cast with as(), or with as.logical(), as.numeric(), etc.
 
-myrange <- as("chrI:1-5:+","GRanges")
-
-if (strand(myrange) == "+") {
-    print("Forward strand")
-}
-
-# The problem 
-strand(myrange) == "+"
-
-# Solution
-if (as(strand(myrange) == "+", "logical")) {
-    print("Forward strand")
-}
 
 
 # ==============================================================================
-# Genomes and genes for model organisms are available as Bioconductor packages
+# BSGenome and TxDb packages
+#
+# Genomes and genes for many model organisms are available as 
+# Bioconductor packages
 #
 # BSgenome. ...  - Genomes as DNAStringSet-like objects
 # TxDB. ...      - Genes, transcripts, exons, CDS as GRanges
-# org. ...       - Translation of gene names, assignment to GO categories
+# org. ...       - Translation of gene names, assignment to GO categories, etc
 #
 # Further data may be available using AnnotationHub.
 #
 # We will be using packages for yeast in this part of the workshop.
-
+#
 
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
 # A yeast genome object has been loaded.
-# Actual data is only loaded from disk as needed.
+# Actual sequence data is only loaded from disk as needed.
 genome <- Scerevisiae
 seqinfo(genome)
 genome$chrM
@@ -116,6 +283,9 @@ cdsBy(txdb, "tx", use.names=TRUE)
 
 
 
+# To illustrate the use of a TxDb, let us try to extract the start codons of
+# yeast. Our first step is to obtain the locations of the coding sequences.
+
 cds_list <- cdsBy(txdb, "tx", use.names=TRUE)
 
 cds_list
@@ -126,11 +296,15 @@ cds_list[ lengths(cds_list) >= 2 ]
 
 seqinfo(cds_list)
 genome(cds_list)
+# GRanges and GRangesLists extracted from the txdb have associated seqinfo.
+# Bioconductor will give an error if you try to use them with the wrong
+# genome.
 
 # The ...By functions return GRangesList objects.
 # To flatten down to a GRanges, use unlist.
 unlist(cds_list)
 # Note that names will not be unique unless each element has length 1.
+
 
 cds_ranges <- unlist( range(cds_list) )
 start_codons <- resize(cds_ranges, 3, fix="start")
@@ -152,16 +326,33 @@ table(start_seqs)
 # Use split() to perform the splitting step manually.
 
 
-# The approach above has a potential flaw:
+
+# Challenge
+# ---------
+#
+# In DNA, a stop codon can be TAG, TAA or TGA.
+#
+# Are stop codons included in the CDS sequence, or just after it?
+#
+# Does yeast have a preferred stop codon?
+#
+# Hint:
+# Use resize(..., fix="end") and flank(..., start=FALSE)
+#
+
+
+
+# The above approach to extracting start codons has a potential flaw:
 # An intron may lie within the start codon.
 
-# An alternative way to get start codons
+# An alternative way to get start codons.
 cds_seqs <- extractTranscriptSeqs(genome, cds_list)
 table( subseq(cds_seqs, 1, 3) )
 
 # It really happens!
 cds_list[ start_seqs == "AGC" ]
 cds_list[ start_seqs == "AGT" ]
+
 
 
 # ==============================================================================
