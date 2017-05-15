@@ -4,8 +4,6 @@
 #
 # Installing Bioconductor packages
 #
-# Loading packages
-#
 # Finding documentation
 #
 # IRanges
@@ -14,7 +12,7 @@
 #
 # DNAString and DNAStringSet
 #
-# BSGenome and TxDb packages
+# BSgenome and TxDb packages
 #
 # Reading and writing files with rtracklayer
 #
@@ -23,6 +21,7 @@
 # ==============================================================================
 # Installing Bioconductor packages
 
+# This will install the packages used in this file.
 source("http://www.bioconductor.org/biocLite.R")
 biocLite(c(
     "GenomicRanges",
@@ -33,8 +32,7 @@ biocLite(c(
 
 
 
-# ==============================================================================
-# Loading packages
+# Load packages
 
 library(GenomicRanges)
 library(Biostrings)
@@ -47,10 +45,13 @@ library(BSgenome)
 
 # Bioconductor packages usually have documentation in the form of "vignettes".
 # These are also available on the Bioconductor website.
+# https://www.bioconductor.org/help/
+
 vignette()
 vignette(package="Biostrings")
 vignette("BiostringsQuickOverview")
-browseVignettes(package="Biostrings")
+
+browseVignettes()
 
 
 
@@ -59,25 +60,36 @@ browseVignettes(package="Biostrings")
 #
 # Integer ranges, 1-based, from start to end inclusive.
 #
-# This is R, everything is a vector.
-# There is no singular IRange, only plural IRanges.
+# This is R, where everything is a vector, so there is no singular IRange, 
+# only plural IRanges.
 
 myiranges <- IRanges(start=c(5,20,25), end=c(10,30,40))
+
+# Like all objects from Bioconductor, myiranges is an "S4" object.
+# It has a class, which can be obtained with class(). This determines 
+# - The functions it can be used with (methods).
+# - What "slots" it has for storing data.
+# Data stored in slots is accessible with @ (like $ for lists),
+# but code that uses accessor functions will be more generic
+# and less liable to break in future.
 
 myiranges
 class(myiranges)
 methods(class="IRanges")
+?"IRanges-class"
 
+# Accessor functions
 start(myiranges)
+#(or myiranges@start, but start(myiranges) is preferable)
 end(myiranges)
 width(myiranges)
 
-# IRanges support many operations
+# IRanges supports many operations
 resize(myiranges, 3, fix="start")
 resize(myiranges, 3, fix="end")
-#...
 
-# Ok, this gets confusing, let me illustrate...
+# ... ok, this gets confusing, let me illustrate...
+
 show_iranges <- function(obj) {
     for(i in seq_along(obj))
         cat(rep(" ", start(obj)[i]),
@@ -93,12 +105,14 @@ show_iranges( resize(myiranges, 3, fix="end")        )
 show_iranges( flank(myiranges, 2, start=TRUE)        )
 show_iranges( flank(myiranges, 2, start=FALSE)       )
 
-show_iranges( range(myiranges) )
-show_iranges( setdiff(range(myiranges), myiranges)   )
+show_iranges( range(myiranges)                       )
 show_iranges( reduce(myiranges)                      )
 show_iranges( disjoin(myiranges)                     )
+
+show_iranges( setdiff(range(myiranges), myiranges)   )
 show_iranges( intersect(myiranges[2], myiranges[3])  )
 show_iranges( union(myiranges[2], myiranges[3])      )
+
 
 ?"intra-range-methods"
 ?"inter-range-methods"
@@ -108,11 +122,15 @@ show_iranges( union(myiranges[2], myiranges[3])      )
 
 # Note:
 # Loading tidyverse packages may clobber some of these generic functions.
-# If necessary use IRanges::setdiff, etc.
+# If necessary use BiocGenerics::setdiff, etc.
 
 
 # Challenge
-
+# ---------
+#
+# Without using the promoters() function,
+# how would you get IRanges from -5 to +2 of the starts of myiranges?
+#
 
 
 # ==============================================================================
@@ -131,7 +149,7 @@ mygranges <- GRanges(
 mygranges
 class(mygranges)
 methods(class="GRanges")
-
+?"GRanges-class"
 
 seqnames(mygranges)
 strand(mygranges)
@@ -159,23 +177,11 @@ mygranges$wobble
 as("chrI:3-5:+", "GRanges")
 
 
-# Operations on GRanges
-#
-# All the operations we saw for IRanges are available for GRanges
-#
-# With GRanges it is often important to take strand into account.
-#
+# All the operations we saw for IRanges are available for GRanges.
+# However most GRanges operations will take strand into account.
 
 resize(mygranges, 3, fix="start")
 resize(mygranges, 3, fix="end")
-
-# Note:
-# Loading tidyverse packages may clobber some of these generic functions.
-# If necessary use GenomicRanges::setdiff, etc.
-
-
-# Challenge
-
 
 
 # ==============================================================================
@@ -186,12 +192,13 @@ myseq <- DNAString("gcgctgctggatgcgaccgcgcatgcgagcgcgacctatccggaa")
 myseq
 class(myseq)
 methods(class="DNAString")
+?"DNAString-class"
 
 reverseComplement(myseq)
 translate(myseq)
+subseq(myseq, 3,5)
 
 # DNAString objects behave like vectors.
-subseq(myseq, 3,5)
 myseq[3:5]
 c(myseq, myseq)
 
@@ -204,6 +211,8 @@ myset <- DNAStringSet(list(chrI=myseq, chrII=DNAString("ACGTACGTAA")))
 
 myset
 class(myset)
+?"DNAStringSet-class"
+
 lengths(myset)
 seqinfo(myset)
 
@@ -234,7 +243,7 @@ getSeq(myset, as("chrI:1-3:-", "GRanges"))
 
 
 # ==============================================================================
-# BSGenome and TxDb packages
+# BSgenome and TxDb packages
 #
 # Genomes and genes for many model organisms are available as 
 # Bioconductor packages
@@ -252,13 +261,21 @@ library(BSgenome.Scerevisiae.UCSC.sacCer3)
 # A yeast genome object has been loaded.
 # Actual sequence data is only loaded from disk as needed.
 genome <- Scerevisiae
+
+class(genome)
+?"BSgenome-class"
+
 seqinfo(genome)
 genome$chrM
+
 
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 # An object referring to a yeast transcriptome database has been loaded.
 # Actual data is only loaded from disk as needed.
 txdb <- TxDb.Scerevisiae.UCSC.sacCer3.sgdGene
+
+class(txdb)
+?"TxDb-class"
 
 # Genes have transcripts. 
 # Transcripts have exons, and CDSs if they are protein coding.
