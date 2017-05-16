@@ -1,0 +1,19 @@
+variableStep chrom=chr2
+300701  12.5
+300702  12.5
+300703  12.5
+300704  12.5
+300705  12.5
+fixedStep chrom=chr3 start=400601 step=150
+10.3
+45.3
+10.5
+15.4
+20.6
+32.3
+10.5
+fixedStep chrom=chr4 start=500001 step=200
+10
+20
+20
+20
