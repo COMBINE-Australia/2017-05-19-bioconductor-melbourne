@@ -7,9 +7,6 @@ output:
     fig_caption: yes
     toc: yes
     toc_depth: 3
-  github_document:
-    toc: yes
-    toc_depth: 3
 ---
 
 # Chunks options
@@ -24,7 +21,7 @@ knitr::opts_chunk$set(fig.width=8,
 # To output a pdf or html document simply substitute github_document with pdf_document or html_document in the header of the file
 
 # Working directory - To be changed once the repository is cloned
-dir <- "~/Documents/varie/Combine_tutorial"
+dir <- "."
 ```
 
 # Install packages
