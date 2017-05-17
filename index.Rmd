@@ -29,5 +29,13 @@ Files:
 
 ---
 
+Participants in this workshop will need to download the files listed above, or
+
+```
+git clone https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne.git
+```
+
+---
+
 [GitHub repository](https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne)
 
