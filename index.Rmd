@@ -1,0 +1,33 @@
+---
+title: "COMBINE R for Bioinformatics workshop"
+output: html_document
+---
+
+**19th May 2017, Melbourne**
+
+## Sections
+
+### [BioStrings and GenomicRanges](strings_and_ranges.html)
+
+Files:
+
+* [strings_and_ranges.Rmd](strings_and_ranges.Rmd)
+
+### [An introduction to Bioconductor and its data structures](data_structures.html)
+
+Files:
+
+* [data_structures.Rmd](data_structures.Rmd)
+
+### [Advanced GenomicRanges, rtracklayer and Rsamtools](AdvGRanges_Rtracklayer_Rsamtools.html)
+
+Files:
+
+* [AdvGRanges_Rtracklayer_Rsamtools.Rmd](AdvGRanges_Rtracklayer_Rsamtools.Rmd)
+* [chr21.bam](chr21.bam)
+* [chr21.bam.bai](chr21.bam.bai)
+
+---
+
+[GitHub repository](https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne)
+

@@ -47,7 +47,7 @@ data(ALL)
 ALL
 
 # help documentation for ALL data
-?ALL
+# ?ALL
 experimentData(ALL)
 
 # extract/explore the gene expression matrix
