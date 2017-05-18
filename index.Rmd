@@ -5,6 +5,10 @@ output: html_document
 
 **19th May 2017, Melbourne**
 
+<div style="font-size: 300%; margin: 2em;">
+http://tinyurl.com/melbioc
+</div>
+
 ## Sections
 
 ### [Biostrings and GenomicRanges](strings_and_ranges.html)
@@ -45,7 +49,7 @@ You will also need to install Bioconductor packages:
 source("http://www.bioconductor.org/biocLite.R")
 biocLite(c(
 # Software packages
-    "BioBase",
+    "Biobase",
     "GenomicRanges",
     "Biostrings", 
     "BSgenome", 
