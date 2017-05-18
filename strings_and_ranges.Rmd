@@ -1,5 +1,5 @@
 ---
-title: "BioStrings and GenomicRanges"
+title: "Biostrings and GenomicRanges"
 author: "Paul Harrison"
 output:
   html_document:
@@ -18,7 +18,8 @@ biocLite(c(
     "Biostrings", 
     "BSgenome", 
     "BSgenome.Scerevisiae.UCSC.sacCer3",
-    "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"))
+    "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
+    "seqLogo"))
 ```
 
 ### Load packages
@@ -115,7 +116,7 @@ show_iranges( union(myiranges[2], myiranges[3])      )
 # ?"nearest-methods"
 ```
 
-**Note:** Loading tidyverse packages may clobber some of these generic functions. If necessary use BiocGenerics::setdiff, etc.
+**Note:** Loading tidyverse packages may clobber some of these generic functions. If necessary use `BiocGenerics::setdiff`, etc.
 
 
 ### Challenge
@@ -182,6 +183,10 @@ resize(mygranges, 3, fix="end")
 
 ## DNAString and DNAStringSet
 
+### DNAString
+
+A DNAString is like a character string of bases "A", "C", "G", "T", or possibly IUPAC ambiguity codes such as "N" for any base.
+
 ```{r}
 myseq <- DNAString("gcgctgctggatgcgaccgcgcatgcgagcgcgacctatccggaa")
 
@@ -194,6 +199,9 @@ reverseComplement(myseq)
 translate(myseq)
 subseq(myseq, 3,5)
 
+alphabetFrequency(myseq)
+letterFrequency(myseq, c("AT", "GC"))
+
 # DNAString objects behave like vectors.
 myseq[3:5]
 c(myseq, myseq)
@@ -201,15 +209,34 @@ c(myseq, myseq)
 # as() converts between types.
 as(myseq, "character")
 as("ACGT", "DNAString")
+```
 
-# We often want to work with a collection of DNA sequences
+#### Finding or counting patterns
+
+```{r}
+matchPattern("GCG", myseq)
+countPattern("GCG", myseq)
+```
+
+These functions have arguments to allow for some number of substitutions, or even substitutions, insertions, and deletions.
+
+Use `pairwiseAlignment()` for more flexible local or global alignment. 
+
+Use `matchPWM()` for a motif represented as a Position Weight Matrix.
+
+
+### DNAStringSet
+
+We often want to work with a collection of DNA sequences.
+
+```{r}
 myset <- DNAStringSet(list(chrI=myseq, chrII=DNAString("ACGTACGTAA")))
 
 myset
 class(myset)
 # ?"DNAStringSet-class"
 
-lengths(myset)
+elementNROWS(myset)
 seqinfo(myset)
 
 # Since a DNAString is like a vector, a DNAStringSet is has to be like a list.
@@ -307,9 +334,9 @@ cds_list <- cdsBy(txdb, "tx", use.names=TRUE)
 
 cds_list
 class(cds_list)
-head( lengths(cds_list) )
-table( lengths(cds_list) )
-cds_list[ lengths(cds_list) >= 2 ]
+head( elementNROWS(cds_list) )
+table( elementNROWS(cds_list) )
+cds_list[ elementNROWS(cds_list) >= 2 ]
 
 seqinfo(cds_list)
 genome(cds_list)
@@ -357,15 +384,51 @@ Use `resize(..., fix="end")` and `flank(..., start=FALSE)`
 
 ### Another way to extract start codons
 
-```{r}
-# The above approach to extracting start codons has a potential flaw:
-# An intron may lie within the start codon.
+The above approach to extracting start codons has a potential flaw: an intron may lie within the start codon.
 
+```{r}
 # An alternative way to get start codons.
 cds_seqs <- extractTranscriptSeqs(genome, cds_list)
 table( subseq(cds_seqs, 1, 3) )
+```
 
-# It really happens!
+It actually happens! "AGC" and "AGT" which we saw previously are gone when we handle introns correctly.
+
+```{r}
 cds_list[ start_seqs == "AGC" ]
 cds_list[ start_seqs == "AGT" ]
 ```
+
+
+### Characterizing a collection of locations in a genome
+
+It's common to want to characterize some collection of locations in a genome: transcription start or end sites, protein binding sites, etc. Bioconductor's core packages make a first pass at characterization fairly simple. You might then proceed to a specialized tool such as a de-novo motif finder.
+
+As an example, let's look at sequence upstrand of CDS regions.
+
+```{r}
+library(seqLogo)
+
+upstrand_ranges <- flank(cds_ranges, 10, start=TRUE)
+
+upstrand_seq <- getSeq(genome, upstrand_ranges)
+upstrand_seq
+
+letter_counts <- consensusMatrix(upstrand_seq)
+probs <- prop.table(letter_counts[1:4,], 2)
+
+seqLogo(probs, ic.scale=FALSE)
+seqLogo(probs)
+
+# We may also be interested in k-mer frequencies
+colSums( oligonucleotideFrequency(upstrand_seq, 2) )
+```
+
+
+
+```{r}
+sessionInfo()
+```
+
+
+

@@ -121,22 +121,18 @@ $(document).ready(function () {
 
 </div>
 
-
-<div id="installing-bioconductor-packages" class="section level3">
-<h3>Installing Bioconductor packages</h3>
-<p>Two possible ways to download a package from Bioconductor:</p>
+<div id="TOC">
 <ul>
-<li><code>source()</code> the Bioconductor R script</li>
-<li><code>biocInstaller::biocLite()</code></li>
+<li><a href="#data-structures"><span class="toc-section-number">0.1</span> Data Structures</a></li>
+<li><a href="#annotation-packages"><span class="toc-section-number">1</span> Annotation packages</a></li>
+<li><a href="#geoquery"><span class="toc-section-number">2</span> GEOquery</a></li>
 </ul>
 </div>
-<div id="s4-classes-and-help-documentation" class="section level3">
-<h3>S4 classes and help documentation</h3>
-</div>
+
 <div id="data-structures" class="section level2">
-<h2>Data Structures</h2>
+<h2><span class="header-section-number">0.1</span> Data Structures</h2>
 <div id="the-three-tables" class="section level4">
-<h4>The three tables</h4>
+<h4><span class="header-section-number">0.1.0.1</span> The three tables</h4>
 <ul>
 <li>There are 3 tables in bioinformatics: the gene expression matrix, sample descriptions and gene annotation</li>
 <li><code>ExpressionSet</code> objects and <code>SummarizedExperiment</code> objects are data structures that store these 3 tables all in one place. This ensures consistency.</li>
@@ -148,7 +144,7 @@ $(document).ready(function () {
 </div>
 </div>
 <div id="the-expressionset-objects" class="section level4">
-<h4>The ExpressionSet Objects</h4>
+<h4><span class="header-section-number">0.1.0.2</span> The ExpressionSet Objects</h4>
 <ul>
 <li>Used to store continuous measurments such as microarray data</li>
 <li>Use <code>exprs()</code> to extract the gene expression matrix. The rows in the matrix represent genes and the columns are the samples</li>
@@ -338,9 +334,9 @@ ids</code></pre>
 ## [1] &quot;643&quot;</code></pre>
 </div>
 <div id="rangedsummarizedexperiment-objects" class="section level4">
-<h4>RangedSummarizedExperiment Objects</h4>
+<h4><span class="header-section-number">0.1.0.3</span> RangedSummarizedExperiment Objects</h4>
 <ul>
-<li>Used to store count data such as RNA-Seq ( but also ChIP-Seq)</li>
+<li>Used to store count data such as RNA-Seq (but also ChIP-Seq)</li>
 <li><code>assays()</code> returns the count matrix. Rows are genes, columns are samples</li>
 <li>Use <code>colData()</code> to get the sample descriptions and <code>rowData()</code> to retrieve gene annotation</li>
 <li>You can extract each column in the sample description table using the usual <code>$</code> that you would use to subset a data frame</li>
@@ -459,12 +455,12 @@ rowRanges(airway)</code></pre>
 </div>
 </div>
 <div id="annotation-packages" class="section level1">
-<h1>Annotation packages</h1>
+<h1><span class="header-section-number">1</span> Annotation packages</h1>
 <p>3 types of annotation packages:</p>
 <ul>
 <li><code>BSgenome</code> packages that are named in the form of <strong>BSgenome.organism.provider.genomeVersion</strong> that contain the actual DNA sequence e.g. <code>BSgenome.Hsapiens.UCSC.hg38</code></li>
-<li><code>TxDb</code> packages that contain gene models and are named in the form of <strong>TxDb.organism.provider.genomeVersion.type </strong> e.g. <code>TxDb.Dmelanogaster.UCSC.dm6.ensGene</code></li>
-<li><code>orgDb</code> packages that provide different gene annotations for any given species such as <code>org.Mm.eg.db</code>. These are the most useful packages when one is interested in ID conversion i.e. ENSEMBL to ENTREZ Ids . These packages start with <strong>org</strong></li>
+<li><code>TxDb</code> packages that contain gene models and are named in the form of <strong>TxDb.organism.provider.genomeVersion.type</strong> e.g. <code>TxDb.Dmelanogaster.UCSC.dm6.ensGene</code></li>
+<li><code>orgDb</code> packages that provide different gene annotations for any given species such as <code>org.Mm.eg.db</code>. These are the most useful packages when one is interested in ID conversion i.e. ENSEMBL to ENTREZ Ids. These packages start with <strong>org</strong>.</li>
 </ul>
 <p>In this section we explore the <strong>orgDb</strong> packages.</p>
 <ul>
@@ -497,7 +493,7 @@ columns(org.Hs.eg.db)</code></pre>
 ## [17] &quot;ONTOLOGYALL&quot;  &quot;PATH&quot;         &quot;PFAM&quot;         &quot;PMID&quot;        
 ## [21] &quot;PROSITE&quot;      &quot;REFSEQ&quot;       &quot;SYMBOL&quot;       &quot;UCSCKG&quot;      
 ## [25] &quot;UNIGENE&quot;      &quot;UNIPROT&quot;</code></pre>
-<p>Lets convert the Ensembl Ids in the airway data to their Entrez Ids</p>
+<p>Lets convert the Ensembl Ids in the airway data to their Entrez Ids …</p>
 <pre class="r"><code>head(rownames(airway))</code></pre>
 <pre><code>## [1] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot;
 ## [5] &quot;ENSG00000000460&quot; &quot;ENSG00000000938&quot;</code></pre>
@@ -512,27 +508,27 @@ columns(org.Hs.eg.db)</code></pre>
 ## 5 ENSG00000000460    55732
 ## 6 ENSG00000000938     2268</code></pre>
 <div id="challenge" class="section level4">
-<h4>&gt; Challenge</h4>
+<h4><span class="header-section-number">1.0.0.1</span> &gt; Challenge</h4>
 <blockquote>
 <p>find the gene symbols and gene descriptions (names) for the airway data</p>
 </blockquote>
 </div>
 <div id="challenge-1" class="section level4">
-<h4>&gt; Challenge</h4>
+<h4><span class="header-section-number">1.0.0.2</span> &gt; Challenge</h4>
 <blockquote>
 <p>Find the symbol of the gene with Ensembl ID “ENSG00000000005” and all the aliases associated with that genes. How many transcripts are recorded for this gene in ENSEMBL Transcript database?</p>
 </blockquote>
 </div>
 </div>
 <div id="geoquery" class="section level1">
-<h1>GEOquery</h1>
+<h1><span class="header-section-number">2</span> GEOquery</h1>
 <ul>
 <li>We all use public data in Bioinformatics</li>
-<li>One of the most pouplar database for downloading the public data that comes with the publications is the NCBI Gene Expression Omnibus (GEO)</li>
+<li>One of the most pouplar databases for downloading the public data that comes with the publications is the NCBI Gene Expression Omnibus (GEO)</li>
 <li><strong>Raw</strong> versus <strong>processed</strong> data in bioinformatics</li>
 <li>In this section we will learn how to access a GEO dataset (processed data) directly from within R</li>
 <li>We use the <code>GEOquery</code> package in Bioconductor</li>
-<li>All you need to download data from GEO is the accession number. Let us use GSE11675 which is a very small scale Affymetrix gene expression array study (6 samples).</li>
+<li>All you need is to download data from GEO is the accession number. Let us use GSE11675 which is a very small scale Affymetrix gene expression array study (6 samples).</li>
 <li>The main functions to remember are <code>getGEO()</code> to retrieve the main files and <code>getGEOSuppFiles()</code> to retrieve the supplementary data</li>
 </ul>
 <pre class="r"><code># source(&quot;http://www.bioconductor.org/biocLite.R&quot;)
@@ -547,7 +543,7 @@ library(GEOquery)</code></pre>
 <pre><code>## Found 1 file(s)</code></pre>
 <pre><code>## GSE11675_series_matrix.txt.gz</code></pre>
 <pre><code>## File stored at:</code></pre>
-<pre><code>## /var/folders/9v/cjl49srx09j1r1xjd5nwry5h0000gn/T//Rtmpi522cU/GPL8300.soft</code></pre>
+<pre><code>## /var/folders/9v/cjl49srx09j1r1xjd5nwry5h0000gn/T//RtmpXCdkgG/GPL8300.soft</code></pre>
 <pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
 ## quote, : not all columns named in 'colClasses' exist</code></pre>
 <pre class="r"><code>class(eList)</code></pre>
@@ -599,11 +595,11 @@ eData</code></pre>
 
 eList2</code></pre>
 <pre><code>##                      size isdir mode               mtime
-## GSE11675_RAW.tar 45803520 FALSE  644 2017-05-17 11:21:19
-## filelist.txt          740 FALSE  644 2017-05-17 11:21:21
+## GSE11675_RAW.tar 45803520 FALSE  644 2017-05-18 16:58:09
+## filelist.txt          740 FALSE  644 2017-05-18 16:58:11
 ##                                ctime               atime uid gid uname
-## GSE11675_RAW.tar 2017-05-17 11:21:19 2017-05-17 11:20:56 501  20   pfh
-## filelist.txt     2017-05-17 11:21:21 2017-05-17 11:05:47 501  20   pfh
+## GSE11675_RAW.tar 2017-05-18 16:58:09 2017-05-18 16:57:56 501  20   pfh
+## filelist.txt     2017-05-18 16:58:11 2017-05-17 11:05:47 501  20   pfh
 ##                  grname
 ## GSE11675_RAW.tar  staff
 ## filelist.txt      staff</code></pre>
