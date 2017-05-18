@@ -1,20 +1,13 @@
 ---
 title: "An intorduction to Bioconductor and it's data structures"
 author: "Soroor Hediyeh-Zadeh"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    depth: 3
+    number_sections: true
+    
 ---
-
-
-
-### Installing Bioconductor packages
-
-Two possible ways to download a package from Bioconductor:
-
-- `source()` the Bioconductor R script
-- `biocInstaller::biocLite()`
-
-
-### S4 classes and help documentation
 
 ## Data Structures
 
@@ -80,7 +73,7 @@ as.list(hgu95av2ENTREZID[ids])
 ```
 
 #### RangedSummarizedExperiment Objects
-- Used to store count data such as RNA-Seq ( but also ChIP-Seq)
+- Used to store count data such as RNA-Seq (but also ChIP-Seq)
 - `assays()` returns the count matrix. Rows are genes, columns are samples
 - Use `colData()` to get the sample descriptions and `rowData()` to retrieve gene annotation
 - You can extract each column in the sample description table using the usual `$` that you would use to subset a data frame
@@ -133,8 +126,8 @@ rowRanges(airway)
 3 types of annotation packages:
 
 - `BSgenome` packages that are named in the form of **BSgenome.organism.provider.genomeVersion** that contain the actual DNA sequence e.g. `BSgenome.Hsapiens.UCSC.hg38`
-- `TxDb` packages that contain gene models and are named in the form of **TxDb.organism.provider.genomeVersion.type ** e.g. `TxDb.Dmelanogaster.UCSC.dm6.ensGene`
-- `orgDb` packages that provide different gene annotations for any given species such as `org.Mm.eg.db`. These are the most useful packages when one is interested in ID conversion i.e. ENSEMBL to ENTREZ Ids . These packages start with **org**
+- `TxDb` packages that contain gene models and are named in the form of **TxDb.organism.provider.genomeVersion.type** e.g. `TxDb.Dmelanogaster.UCSC.dm6.ensGene`
+- `orgDb` packages that provide different gene annotations for any given species such as `org.Mm.eg.db`. These are the most useful packages when one is interested in ID conversion i.e. ENSEMBL to ENTREZ Ids. These packages start with **org**.
 
 In this section we explore the **orgDb** packages.
 
@@ -157,7 +150,7 @@ head(keys, n = 30)
 columns(org.Hs.eg.db)
 ```
 
-Lets convert the Ensembl Ids in the airway data to their Entrez Ids
+Lets convert the Ensembl Ids in the airway data to their Entrez Ids ...
 
 ```{r}
 head(rownames(airway))
@@ -178,11 +171,11 @@ head(ensembl_to_entrez)
 # GEOquery
 
 - We all use public data in Bioinformatics
-- One of the most pouplar database for downloading the public data that comes with the publications is the NCBI Gene Expression Omnibus (GEO)
+- One of the most pouplar databases for downloading the public data that comes with the publications is the NCBI Gene Expression Omnibus (GEO)
 - **Raw** versus **processed** data in bioinformatics
 - In this section we will learn how to access a GEO dataset (processed data) directly from within R
 - We use the `GEOquery` package in Bioconductor
-- All you need to download data from GEO is the accession number. Let us use GSE11675 which is a
+- All you need is to download data from GEO is the accession number. Let us use GSE11675 which is a
 very small scale Affymetrix gene expression array study (6 samples).
 - The main functions to remember are `getGEO()` to retrieve the main files and `getGEOSuppFiles()` to retrieve the supplementary data
 
