@@ -7,7 +7,7 @@ output: html_document
 
 ## Sections
 
-### [BioStrings and GenomicRanges](strings_and_ranges.html)
+### [Biostrings and GenomicRanges](strings_and_ranges.html)
 
 Files:
 
