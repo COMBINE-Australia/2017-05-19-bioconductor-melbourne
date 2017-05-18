@@ -57,12 +57,12 @@ Imagine you have done an experiment on *Sample 1* and your output is a set of ge
 
 ```{r}
 # Create and example: Sample 1
-gr_S1 <- GenomicRanges::GRanges(
-seqnames = Rle(c("chr1", "chr2"), c(3, 2)),   
-ranges = IRanges::IRanges(start = c(5,8,20,8,18), 
+gr_S1 <- GRanges(
+seqnames = rep(c("chr1", "chr2"), times = c(3,2)),   
+ranges = IRanges(start = c(5,8,20,8,18), 
                  end = c(11,15,26,16,21), 
                  names = c(paste("Range_",1:5,sep = ""))), 
-strand = S4Vectors::Rle(strand(c("*")), c(5)))
+strand = rep(strand(c("*")), times = 5))
 
 gr_S1
 ```
@@ -72,12 +72,12 @@ As an example we create a simple fake gene annotation to use with the ranges cre
 
 ```{r}
 # Gene annotation
-genes <- GenomicRanges::GRanges(
-seqnames = S4Vectors::Rle(c("chr1", "chr2"), c(2, 2)),  
-ranges = IRanges::IRanges(start = c(7,17,7,23), 
+genes <- GRanges(
+seqnames = rep(c("chr1", "chr2"), times = c(2, 2)),  
+ranges = IRanges(start = c(7,17,7,23), 
                  end = c(15,23,14,26), 
                  names = c(paste("Gene_",1:4,sep = ""))), 
-strand = S4Vectors::Rle(strand(c("+","+")), c(2,2)))
+strand = rep(strand(c("+")), times = 4))
 
 genes
 ```
@@ -89,6 +89,7 @@ Figure 1 is a simple way of plotting ranges stored into `Granges` object using  
 gr <- as.data.frame(rbind(as.data.frame(gr_S1), as.data.frame(genes)))
 gr$rangeID <- c(names(gr_S1),names(genes))
 gr$Sample <- c(rep("Peaks",length(gr_S1)), rep("Genes",length(genes)))
+
 ggplot(data = gr, aes(xmin = start, xmax = end, ymin = 0, ymax = 1)) + 
   geom_rect( aes(fill = rangeID),alpha = 0.4) + facet_wrap(~ Sample + seqnames) + theme_bw() +
   labs(x = "Genomic position", y = "Ranges") +theme(axis.ticks.y=element_blank(),axis.text.y = element_blank())
@@ -98,23 +99,13 @@ ggplot(data = gr, aes(xmin = start, xmax = end, ymin = 0, ymax = 1)) +
 
 ## Overlaps between two `GRanges` objects
 
-```{r}
-# Combine overlapping ranges in the peak object
-gr_S1_reduced <- GenomicRanges::reduce(gr_S1)
-gr_S1_reduced
-length(gr_S1)
-length(gr_S1_reduced)
-```
-
-One can also decide to keep every range distinct and evaluate the overlap for each one of them. For this analysis we will keep the overlapping ranges as disticnt regions.
-
 ### `findOverlaps()` 
 
 By default looks for overlaps of a minimum of 1bp between a `query` and a `subject`.
 
 ```{r}
 ### `findOverlaps()` 
-?GenomicRanges::findOverlaps
+?findOverlaps
 overlaps <- findOverlaps(query = gr_S1, subject = genes)
 overlaps
 # Query the output
@@ -143,12 +134,12 @@ overlaps
 
 ```{r}
 ## `countOverlaps()`
-?GenomicRanges::countOverlaps
+?countOverlaps
 ```
 
 
 ```{r}
-N_overlaps <- GenomicRanges::countOverlaps(gr_S1,genes)
+N_overlaps <- countOverlaps(gr_S1,genes)
 N_overlaps
 # You can play around with the same options as findOverlaps()
 ```
@@ -160,30 +151,30 @@ N_overlaps
 ```{r}
 ## Nearest-methods in `GenomicRanges`
 ### `nearest()`
-?GenomicRanges::nearest
+?nearest
 ```
 
 It returns a vector of indeces referring to the nearest neighbour range in `subject` for every range in `x`.
 By default if one range overlaps with multiple genes then one overlap will be chosen at random:
 
 ```{r}
-GenomicRanges::nearest(x = gr_S1, subject = genes)
-GenomicRanges::nearest(x = gr_S1,subject = genes, select = "all")
-GenomicRanges::nearest(gr_S1)
-GenomicRanges::nearest(gr_S1,gr_S1)
+nearest(x = gr_S1, subject = genes)
+nearest(x = gr_S1,subject = genes, select = "all")
+nearest(gr_S1)
+nearest(gr_S1,gr_S1)
 ```
 
 ### `distance()`
 
 ```{r}
 ### `distance()`
-?GenomicRanges::distance
+?distance
 ```
 
 ```{r}
-GenomicRanges::distance(x = gr_S1[1],y = genes)
-GenomicRanges::distance(x = gr_S1[1:4],y = genes)
-GenomicRanges::distance(x = gr_S1, y = genes)
+distance(x = gr_S1[1],y = genes)
+distance(x = gr_S1[1:4],y = genes)
+distance(x = gr_S1, y = genes)
 ```
 
 `distance()` is a symmetric function which means that it requires x and y to have to have the same lenght and if one is shorter than the other one it will be recycled to match the length of the longest. Also, the distance between two consecutive blocks is 0 not 1 which affects the notion of overlaps. If `distance(x, y) == 0` then x and y can be either adjacent or overlapping ranges.
@@ -192,13 +183,13 @@ GenomicRanges::distance(x = gr_S1, y = genes)
 
 ```{r}
 ### `distanceToNearest()`
-?GenomicRanges::distanceToNearest
+?distanceToNearest
 ```
 
 For every range in `x` it will return the index and the distance to its nearest neighbour in `subject`.
 
 ```{r}
-GenomicRanges::distanceToNearest(x = gr_S1, subject = genes)
+distanceToNearest(x = gr_S1, subject = genes)
 ```
 
 
@@ -212,21 +203,21 @@ GenomicRanges::distanceToNearest(x = gr_S1, subject = genes)
 # Create a GRangesList 
 # Sample 1
 gr_S1 <- GRanges(
-seqnames = Rle(c("chr1", "chr2"), c(3, 2)),   
+seqnames = rep(c("chr1", "chr2"), times = c(3, 2)),   
 ranges = IRanges(start = c(5,8,20,8,18), 
                  end = c(11,15,26,16,21), 
                  names = c(paste("Region_",1:5,sep = ""))), 
-strand = Rle(strand(c("*")), c(5))) 
+strand = rep("*", times = 5) )
 
 gr_S1
 
 # Sample 2
 gr_S2 <- GRanges(
-seqnames = Rle(c("chr2", "chr3"), c(3, 5)),   
+seqnames = rep(c("chr2", "chr3"), times = c(3, 5)),   
 ranges = IRanges(start = c(1:8), 
                  width = 10, 
                  names = c(paste("Region_",1:8,sep = ""))), 
-strand = Rle(strand(c("*")), c(8)))
+strand = rep("*", times = 8))
 
 gr_S2
 
@@ -255,45 +246,12 @@ To get the number of ranges in every object of the list use `elementNROWS`:
 elementNROWS(list_ranges) 
 ```
 
-To append two `GRangesList` object simply use the R concatenate command `c`:
-
-```{r}
-# Append GRangesList
-# Sample 3
-gr_S3 <- GRanges(
-seqnames = Rle(c("chr1", "chr2"), c(3, 2)),   
-ranges = IRanges(start = 20:24, 
-                 width = 8, 
-                 names = c(paste("Region_",1:5,sep = ""))), 
-strand = Rle(strand(c("*")), c(5)))
-
-gr_S1
-
-# Sample 4
-gr_S4 <- GRanges(
-seqnames = Rle(c("chr2", "chr3"), c(3, 5)),   
-ranges = IRanges(start = 20:27, 
-                 width = 10, 
-                 names = c(paste("Region_",1:8,sep = ""))), 
-strand = Rle(strand(c("*")), c(8)))
-
-gr_S4
-
-# Second GRanges List
-list_ranges2 <- GRangesList(Sample3 = gr_S3, Sample4 = gr_S4)
-```
-
-
-```{r}
-append_lists <- c(list_ranges,list_ranges2)
-```
-
 ## Subsetting and looping over `Granges` list
 
 Add an extra column to every `GRanges` in the `GRangesList`.
 
 ```{r}
-addCols <- lapply(append_lists, function(x){
+addCols <- lapply(list_ranges, function(x){
 elementMetadata(x) <- data.frame(NumberReads = rbinom(length(x),size = 100, prob = 0.5))
 return(x)
 })
@@ -318,57 +276,29 @@ addCols["Sample1","NumberReads"]
 # Looping
 lapply(addCols, length)
 sapply(addCols, length)
-lapply(addCols, start)
-```
-
-
-```{r}
-# Concatenate and reduce the GRangesList
-Reduce(c,addCols)
 ```
 
 Similar considerations apply for the other functions explored above like `findOverlaps()`, `countOverlaps()`, etc...
 
-#### Challenge
+#### Challenge 2
 
-> Using the code below to download the `cpg_islands` object containing the CpG islands for the Human chr21 and the `txdb` gene annotation from `TxDb.Hsapiens.UCSC.hg19.knownGene`. 
+> Use the code below to download the `cpg_islands` object containing the CpG islands for the Human chrY and the `txdb` gene annotation from `TxDb.Hsapiens.UCSC.hg19.knownGene`. 
 
 ```{r}
-# Download CpG islands from UCSC
-session <- rtracklayer::browserSession("UCSC")
-query <- rtracklayer::ucscTableQuery(session, "CpG Islands",GRangesForUCSCGenome("hg19", "chr21"))
-cpg_islands <- rtracklayer::getTable(query)
+# Download CpG islands from UCSC genome browser
+# in the same way you can extract many more genomic object
+session <- browserSession("UCSC")
+query <- ucscTableQuery(session, "CpG Islands",GRangesForUCSCGenome("hg19", "chrY"))
+cpg_islands <- getTable(query)
 # Download genes 
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 ```
 
-> 1. What is the class of `cpg_islandsGR`? Convert `cpg_islandsGR` to a `GRanges` object.
+> 1. What is the class of `cpg_islands`? Convert `cpg_islands` to a `GRanges` object.
 > 2. Using what you have previosly learnt, get the transcript for every gene from the `txdb` gene annotation and store them into the `transcriptHg19` object (suggestion: see `transcriptsBy`).
-> 3. Subset `transcriptHg19` to extract only the transcript on chr21.
+> 3. Subset `transcriptHg19` to extract only the transcript on chr21 (suggestion: first run unlist(transcriptHg19)).
 > 4. Find the nearest CpG island in `cpg_islandsGR` to every transcript in `transcriptHg19` as well as their distance.
 > 5. Optional: On average, every CpG island is close to how many genes?
-
-#### Solutions
-
-```{r}
-#### Solutions
-# 1. Convert to GRanges
-cpg_islandsGR <- as(cpg_islands,"GRanges")
-
-# 2. Get the transcript for every gene from the `txdb`
-transcriptHg19 <- transcriptsBy(txdb,by = "gene")
-
-# 3. Only select chr21
-transcriptHg19 <- unlist(transcriptHg19)
-chr21 <- transcriptHg19[seqnames(transcriptHg19) == "chr21",]
-
-# 4. Find the nearest CpG island in `cpg_islandsGR` to every transcript in `transcriptHg19` as well as their distance.
-chr21_cpg <- distanceToNearest(chr21, cpg_islandsGR)
-
-# 5. On average, every CpG island is close to how many genes?
-mean(table(subjectHits(chr21_cpg)))
-
-```
 
 
 \clearpage
@@ -385,40 +315,26 @@ There is a very large number of different data formats used to store different s
 
 The **GFF** and **GTF** are the preferred format used to store annotations and their exact specification is summarised in [GFF/GTF File Format](http://www.ensembl.org/info/website/upload/gff.html).
 
-The function `rtracklayer::import()` is used to import all the supported data types into a `GRanges` object in R. The function recognises the format from the extension of the file but the argument `format` can be used to expliciclty define it. The function `rtracklayer::export()` works in the same way and it is used to export `GRanges` objects to files.
+The function `import()` is used to import all the supported data types into a `GRanges` object in R. The function recognises the format from the extension of the file but the argument `format` can be used to expliciclty define it. The function `export()` works in the same way and it is used to export `GRanges` objects to files.
 
 ```{r }
 # Rtracklayer
 # Import/Export with Rtrcaklayer
-# Select only 100 ranges
-chr21_shorter <- chr21[1:100]
-rtracklayer::export(chr21_shorter, file.path(dir,"transcriptHg19.gff"))
-rtracklayer::export(chr21_shorter, file.path(dir,"transcriptHg19.gtf"))
+gr_S1
+export(gr_S1, file.path(dir,"transcriptHg19.gff"))
+export(gr_S1, file.path(dir,"transcriptHg19.gtf"))
 
-importHg19 <- rtracklayer::import(file.path(dir,"transcriptHg19.gff"))
+importHg19 <- import(file.path(dir,"transcriptHg19.gff"))
 class(importHg19)
 importHg19
 ```
 
-#### Challenge
+#### Challenge 1
 
 > 1. Create a simple `GRanges` object made out of 20 ranges and export it as a `gff` file. 
 > 2. Read the file back into R.
-> 3. Print the number of ranges of the `GRanges` object just imported and create a histogram of the widths of the ranges.
+> 3. Optional: Print the number of ranges of the `GRanges` object just imported and create a histogram of the widths of the ranges.
 
-#### Solution
-
-```{r}
-#### Solution
-# 1. Create  GRanges object made of 20 ranges
-exampleGR <- GRanges(seqnames = Rle("chr1",20), IRanges(start = 1:20, width = rbinom(20,size = 100, prob = 0.6)))
-export(exampleGR, file.path(dir,"exampleGR.gff"))
-# 2. Read the file back into R.
-exampleGR_import <- import(file.path(dir,"exampleGR.gff"))
-# 3. Print the number of rows of the `GRanges` object just imported and create a histogram of the widths of the ranges.
-length(exampleGR_import)
-hist(width(exampleGR_import))
-```
 
 ## Wiggle (WIG) and bigWIG file formats for graphing tracks
 
@@ -456,15 +372,15 @@ fixedStep chrom=chr3 start=400601 step=100
 33
 ```
 
-The [bigWig](https://genome.ucsc.edu/goldenpath/help/wiggle.html) file is created from a *WIG* file and in `R` this can be achieved through `rtracklayer::wigToBigWig()`. *bigWig* is the recommended format for very large data tracks due to the way in which data are compressed and stored in an indexed binary format. Usually whole-genome coverage vectors are stored as *bigWig*. Howver, the loss is negligible when dealing with very large amount of data. 
+The [bigWig](https://genome.ucsc.edu/goldenpath/help/wiggle.html) file is created from a *WIG* file and in `R` this can be achieved through `wigToBigWig()`. *bigWig* is the recommended format for very large data tracks due to the way in which data are compressed and stored in an indexed binary format. Usually whole-genome coverage vectors are stored as *bigWig*. Howver, the loss is negligible when dealing with very large amount of data. 
 
 ```{r }
 ## Wiggle (WIG) and bigWIG
 ## Import
 wig_path <- file.path(dir, "exampleWIG.wig")
-import_wig <- rtracklayer::import(con = wig_path,seqinfo = Seqinfo(genome="mm10"))
+import_wig <- import(con = wig_path,seqinfo = Seqinfo(genome="mm10"))
 import_wig
-?GenomeInfoDb::Seqinfo
+?Seqinfo
 seqinfo(import_wig)
 ```
 
@@ -472,8 +388,8 @@ Convert the *WIG* file into a *bigWig* file and import the *bigWig* file into R.
 
 ```{r}
 bigwig_path <- file.path(dir,"example_wigToBigWig.bw")
-rtracklayer::wigToBigWig(wig_path, dest = bigwig_path, seqinfo = seqinfo(import_wig))
-import_bigwig <- rtracklayer::import(con = bigwig_path)
+wigToBigWig(wig_path, dest = bigwig_path, seqinfo = seqinfo(import_wig))
+import_bigwig <- import(con = bigwig_path)
 ```
 
 ## Import only a region of the bigWig file
@@ -483,7 +399,7 @@ The `import` functions allows to load into a R only a specific regions defined u
 ```{r }
 # Define a region
 which_region <- GRanges(seqnames = "chr3", IRanges(start = 1, end = 500000))
-import_bigwig_region <- rtracklayer::import(con = bigwig_path, which = which_region)
+import_bigwig_region <- import(con = bigwig_path, which = which_region)
 ```
 
 # `liftOver` from different genome releases
@@ -502,7 +418,7 @@ query(ahub.chain, c("hg18", "hg19"))
 
 chain <- ahub.chain[ahub.chain$title == "hg19ToHg18.over.chain.gz"]
 chain <- chain[[1]]
-gr.hg18 <- rtracklayer::liftOver(import_bigwig, chain)
+gr.hg18 <- liftOver(import_bigwig, chain)
 gr.hg18
 unlist(gr.hg18)
 ```
@@ -554,12 +470,17 @@ head(region1$seq)
 head(region1$isize)
 ```
 
-`GenomicAlignments::readGAlignments` also loads *BAM* files into R directly into a `GRanges` object. The parameters are specified as in `RSamtools` with the argument `param`. 
+`readGAlignments` also loads *BAM* files into R directly into a `GRanges` object. The parameters are specified as in `RSamtools` with the argument `param`. 
 
 ```{r}
 # GenomicAlignments
-readsGA <- GenomicAlignments::readGAlignments(bamfile, param = param)
+readsGA <- readGAlignments(bamfile, param = param)
 ```
+
+#### Challenge 3
+
+> 1. Define a new `ScanBamParam()` object that satisfies the following options:  use the same ranges as above, load both main alignments and PCR duplicates, properly paired and uniquely mapped reads.  
+> 2. Plot an histogram of the fragment sizes of every read (Suggestion: look for the `isize` fields)
 
 ## Compute number of reads that falls within 100bp bins
 
@@ -582,35 +503,4 @@ bin_sum <- viewSums(rangeViews)
 binned_counts <- ranges(rangeViews)
 values(binned_counts) <- data.frame(ReadCounts = bin_sum)
 ```
-
-
-#### Challenge
-
-> 1. Define a new `ScanBamParam()` object that satisfies the following options:  use the same ranges as above, load both main alignments and PCR duplicates, properly paired and uniquely mapped reads.  
-> 2. Plot an histogram of the fragment sizes of every read (Suggestion: look for the `isize` fields)
-
-#### Solution
-
-```{r}
-# 1.
-# Path to the bamfile. In the same folder there has to be the chr1.bam.bai file
-bamfile <- file.path(dir,"chr21.bam")
-# Define parameters
-which <- GRanges(seqnames = rep("chr21",3), 
-                 IRanges(start = c(9827000, 16267000, 15890000), 
-                         width = 10000)) 
-what <- c("rname", "strand", "pos", "qwidth", "seq", "isize")
-# ?scanBamFlag
-flag = scanBamFlag(isDuplicate = NA, isProperPair = TRUE, isPaired = TRUE)
-
-param <- ScanBamParam(which = which, what = what, flag = flag)
-# load reads into R
-reads = scanBam(bamfile, param = param)
-
-# 2. 
-hist(reads$`chr21:16267000-16276999`$isize)
-```
-
-
-
 

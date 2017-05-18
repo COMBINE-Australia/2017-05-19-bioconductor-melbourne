@@ -194,11 +194,11 @@ dir &lt;- &quot;.&quot;</code></pre>
 <h1>Advanced <code>GenomicRanges</code></h1>
 <p>Imagine you have done an experiment on <em>Sample 1</em> and your output is a set of genomic ranges. Let’s start by manually creating a very simple <code>GRanges</code> objects with ranges on <em>chr1</em> and <em>chr2</em>.</p>
 <pre class="r"><code>&gt; # Create and example: Sample 1
-&gt; gr_S1 &lt;- GenomicRanges::GRanges(seqnames = Rle(c(&quot;chr1&quot;, 
-+     &quot;chr2&quot;), c(3, 2)), ranges = IRanges::IRanges(start = c(5, 
+&gt; gr_S1 &lt;- GRanges(seqnames = rep(c(&quot;chr1&quot;, &quot;chr2&quot;), 
++     times = c(3, 2)), ranges = IRanges(start = c(5, 
 +     8, 20, 8, 18), end = c(11, 15, 26, 16, 21), names = c(paste(&quot;Range_&quot;, 
-+     1:5, sep = &quot;&quot;))), strand = S4Vectors::Rle(strand(c(&quot;*&quot;)), 
-+     c(5)))
++     1:5, sep = &quot;&quot;))), strand = rep(strand(c(&quot;*&quot;)), 
++     times = 5))
 &gt; 
 &gt; gr_S1</code></pre>
 <pre><code>## GRanges object with 5 ranges and 0 metadata columns:
@@ -213,11 +213,11 @@ dir &lt;- &quot;.&quot;</code></pre>
 ##   seqinfo: 2 sequences from an unspecified genome; no seqlengths</code></pre>
 <p>A very common analysis to perform is to evaluate to what extent and where your ranges overlap with some <strong>features</strong>, such as genes, exons, etc… As an example we create a simple fake gene annotation to use with the ranges created above.</p>
 <pre class="r"><code>&gt; # Gene annotation
-&gt; genes &lt;- GenomicRanges::GRanges(seqnames = S4Vectors::Rle(c(&quot;chr1&quot;, 
-+     &quot;chr2&quot;), c(2, 2)), ranges = IRanges::IRanges(start = c(7, 
+&gt; genes &lt;- GRanges(seqnames = rep(c(&quot;chr1&quot;, &quot;chr2&quot;), 
++     times = c(2, 2)), ranges = IRanges(start = c(7, 
 +     17, 7, 23), end = c(15, 23, 14, 26), names = c(paste(&quot;Gene_&quot;, 
-+     1:4, sep = &quot;&quot;))), strand = S4Vectors::Rle(strand(c(&quot;+&quot;, 
-+     &quot;+&quot;)), c(2, 2)))
++     1:4, sep = &quot;&quot;))), strand = rep(strand(c(&quot;+&quot;)), 
++     times = 4))
 &gt; 
 &gt; genes</code></pre>
 <pre><code>## GRanges object with 4 ranges and 0 metadata columns:
@@ -235,6 +235,7 @@ dir &lt;- &quot;.&quot;</code></pre>
 &gt; gr$rangeID &lt;- c(names(gr_S1), names(genes))
 &gt; gr$Sample &lt;- c(rep(&quot;Peaks&quot;, length(gr_S1)), rep(&quot;Genes&quot;, 
 +     length(genes)))
+&gt; 
 &gt; ggplot(data = gr, aes(xmin = start, xmax = end, ymin = 0, 
 +     ymax = 1)) + geom_rect(aes(fill = rangeID), alpha = 0.4) + 
 +     facet_wrap(~Sample + seqnames) + theme_bw() + labs(x = &quot;Genomic position&quot;, 
@@ -249,29 +250,23 @@ Graphic representation of the GRanges objects created above.
 <p></p>
 <div id="overlaps-between-two-granges-objects" class="section level2">
 <h2>Overlaps between two <code>GRanges</code> objects</h2>
-<pre class="r"><code>&gt; # Combine overlapping ranges in the peak object
-&gt; gr_S1_reduced &lt;- GenomicRanges::reduce(gr_S1)
-&gt; gr_S1_reduced</code></pre>
-<pre><code>## GRanges object with 4 ranges and 0 metadata columns:
-##       seqnames    ranges strand
-##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
-##   [1]     chr1  [ 5, 15]      *
-##   [2]     chr1  [20, 26]      *
-##   [3]     chr2  [ 8, 16]      *
-##   [4]     chr2  [18, 21]      *
-##   -------
-##   seqinfo: 2 sequences from an unspecified genome; no seqlengths</code></pre>
-<pre class="r"><code>&gt; length(gr_S1)</code></pre>
-<pre><code>## [1] 5</code></pre>
-<pre class="r"><code>&gt; length(gr_S1_reduced)</code></pre>
-<pre><code>## [1] 4</code></pre>
-<p>One can also decide to keep every range distinct and evaluate the overlap for each one of them. For this analysis we will keep the overlapping ranges as disticnt regions.</p>
 <div id="findoverlaps" class="section level3">
 <h3><code>findOverlaps()</code></h3>
 <p>By default looks for overlaps of a minimum of 1bp between a <code>query</code> and a <code>subject</code>.</p>
 <pre class="r"><code>&gt; ### `findOverlaps()`
-&gt; `?`(GenomicRanges::findOverlaps)
-&gt; overlaps &lt;- findOverlaps(query = gr_S1, subject = genes)
+&gt; `?`(findOverlaps)</code></pre>
+<pre><code>## Help on topic 'findOverlaps' was found in the following packages:
+## 
+##   Package               Library
+##   SummarizedExperiment
+##                       /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   IRanges               /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   GenomicRanges         /wehisan/home/allstaff/q/quaglieri.a/R/x86_64-pc-linux-gnu-library/3.3
+##   GenomicAlignments     /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+## 
+## 
+## Using the first match ...</code></pre>
+<pre class="r"><code>&gt; overlaps &lt;- findOverlaps(query = gr_S1, subject = genes)
 &gt; overlaps</code></pre>
 <pre><code>## Hits object with 4 hits and 0 metadata columns:
 ##       queryHits subjectHits
@@ -344,8 +339,16 @@ Graphic representation of the GRanges objects created above.
 <div id="countoverlaps" class="section level3">
 <h3><code>countOverlaps()</code></h3>
 <pre class="r"><code>&gt; ## `countOverlaps()`
-&gt; `?`(GenomicRanges::countOverlaps)</code></pre>
-<pre class="r"><code>&gt; N_overlaps &lt;- GenomicRanges::countOverlaps(gr_S1, genes)
+&gt; `?`(countOverlaps)</code></pre>
+<pre><code>## Help on topic 'countOverlaps' was found in the following packages:
+## 
+##   Package               Library
+##   IRanges               /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   GenomicRanges         /wehisan/home/allstaff/q/quaglieri.a/R/x86_64-pc-linux-gnu-library/3.3
+## 
+## 
+## Using the first match ...</code></pre>
+<pre class="r"><code>&gt; N_overlaps &lt;- countOverlaps(gr_S1, genes)
 &gt; N_overlaps</code></pre>
 <pre><code>## Range_1 Range_2 Range_3 Range_4 Range_5 
 ##       1       1       1       1       0</code></pre>
@@ -358,12 +361,21 @@ Graphic representation of the GRanges objects created above.
 <div id="nearest" class="section level3">
 <h3><code>nearest()</code></h3>
 <pre class="r"><code>&gt; ## Nearest-methods in `GenomicRanges` `nearest()`
-&gt; `?`(GenomicRanges::nearest)</code></pre>
+&gt; `?`(nearest)</code></pre>
+<pre><code>## Help on topic 'nearest' was found in the following packages:
+## 
+##   Package               Library
+##   SummarizedExperiment
+##                       /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   IRanges               /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   GenomicRanges         /wehisan/home/allstaff/q/quaglieri.a/R/x86_64-pc-linux-gnu-library/3.3
+## 
+## 
+## Using the first match ...</code></pre>
 <p>It returns a vector of indeces referring to the nearest neighbour range in <code>subject</code> for every range in <code>x</code>. By default if one range overlaps with multiple genes then one overlap will be chosen at random:</p>
-<pre class="r"><code>&gt; GenomicRanges::nearest(x = gr_S1, subject = genes)</code></pre>
+<pre class="r"><code>&gt; nearest(x = gr_S1, subject = genes)</code></pre>
 <pre><code>## [1] 1 1 2 3 4</code></pre>
-<pre class="r"><code>&gt; GenomicRanges::nearest(x = gr_S1, subject = genes, 
-+     select = &quot;all&quot;)</code></pre>
+<pre class="r"><code>&gt; nearest(x = gr_S1, subject = genes, select = &quot;all&quot;)</code></pre>
 <pre><code>## Hits object with 5 hits and 0 metadata columns:
 ##       queryHits subjectHits
 ##       &lt;integer&gt;   &lt;integer&gt;
@@ -374,29 +386,50 @@ Graphic representation of the GRanges objects created above.
 ##   [5]         5           4
 ##   -------
 ##   queryLength: 5 / subjectLength: 4</code></pre>
-<pre class="r"><code>&gt; GenomicRanges::nearest(gr_S1)</code></pre>
+<pre class="r"><code>&gt; nearest(gr_S1)</code></pre>
 <pre><code>## [1] 2 1 2 5 4</code></pre>
-<pre class="r"><code>&gt; GenomicRanges::nearest(gr_S1, gr_S1)</code></pre>
+<pre class="r"><code>&gt; nearest(gr_S1, gr_S1)</code></pre>
 <pre><code>## [1] 1 1 3 4 5</code></pre>
 </div>
 <div id="distance" class="section level3">
 <h3><code>distance()</code></h3>
 <pre class="r"><code>&gt; ### `distance()`
-&gt; `?`(GenomicRanges::distance)</code></pre>
-<pre class="r"><code>&gt; GenomicRanges::distance(x = gr_S1[1], y = genes)</code></pre>
+&gt; `?`(distance)</code></pre>
+<pre><code>## Help on topic 'distance' was found in the following packages:
+## 
+##   Package               Library
+##   SummarizedExperiment
+##                       /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   IRanges               /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   GenomicRanges         /wehisan/home/allstaff/q/quaglieri.a/R/x86_64-pc-linux-gnu-library/3.3
+## 
+## 
+## Using the first match ...</code></pre>
+<pre class="r"><code>&gt; distance(x = gr_S1[1], y = genes)</code></pre>
 <pre><code>## [1]  0  5 NA NA</code></pre>
-<pre class="r"><code>&gt; GenomicRanges::distance(x = gr_S1[1:4], y = genes)</code></pre>
+<pre class="r"><code>&gt; distance(x = gr_S1[1:4], y = genes)</code></pre>
 <pre><code>## [1]  0  1 NA  6</code></pre>
-<pre class="r"><code>&gt; GenomicRanges::distance(x = gr_S1, y = genes)</code></pre>
+<pre class="r"><code>&gt; distance(x = gr_S1, y = genes)</code></pre>
 <pre><code>## [1]  0  1 NA  6 NA</code></pre>
 <p><code>distance()</code> is a symmetric function which means that it requires x and y to have to have the same lenght and if one is shorter than the other one it will be recycled to match the length of the longest. Also, the distance between two consecutive blocks is 0 not 1 which affects the notion of overlaps. If <code>distance(x, y) == 0</code> then x and y can be either adjacent or overlapping ranges.</p>
 </div>
 <div id="distancetonearest" class="section level3">
 <h3><code>distanceToNearest()</code></h3>
 <pre class="r"><code>&gt; ### `distanceToNearest()`
-&gt; `?`(GenomicRanges::distanceToNearest)</code></pre>
+&gt; `?`(distanceToNearest)</code></pre>
+<pre><code>## Help on topic 'distanceToNearest' was found in the following
+## packages:
+## 
+##   Package               Library
+##   SummarizedExperiment
+##                       /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   IRanges               /wehisan/general/system/bioinf-software/bioinfsoftware/R/R-3.3.0/lib64/R/library
+##   GenomicRanges         /wehisan/home/allstaff/q/quaglieri.a/R/x86_64-pc-linux-gnu-library/3.3
+## 
+## 
+## Using the first match ...</code></pre>
 <p>For every range in <code>x</code> it will return the index and the distance to its nearest neighbour in <code>subject</code>.</p>
-<pre class="r"><code>&gt; GenomicRanges::distanceToNearest(x = gr_S1, subject = genes)</code></pre>
+<pre class="r"><code>&gt; distanceToNearest(x = gr_S1, subject = genes)</code></pre>
 <pre><code>## Hits object with 5 hits and 1 metadata column:
 ##       queryHits subjectHits |  distance
 ##       &lt;integer&gt;   &lt;integer&gt; | &lt;integer&gt;
@@ -414,11 +447,10 @@ Graphic representation of the GRanges objects created above.
 <h2><code>GRangesList</code></h2>
 <p><code>GRangesList</code> are lists of <code>GRanges</code> objects.</p>
 <pre class="r"><code>&gt; # Create a GRangesList Sample 1
-&gt; gr_S1 &lt;- GRanges(seqnames = Rle(c(&quot;chr1&quot;, &quot;chr2&quot;), 
-+     c(3, 2)), ranges = IRanges(start = c(5, 8, 20, 
-+     8, 18), end = c(11, 15, 26, 16, 21), names = c(paste(&quot;Region_&quot;, 
-+     1:5, sep = &quot;&quot;))), strand = Rle(strand(c(&quot;*&quot;)), 
-+     c(5)))
+&gt; gr_S1 &lt;- GRanges(seqnames = rep(c(&quot;chr1&quot;, &quot;chr2&quot;), 
++     times = c(3, 2)), ranges = IRanges(start = c(5, 
++     8, 20, 8, 18), end = c(11, 15, 26, 16, 21), names = c(paste(&quot;Region_&quot;, 
++     1:5, sep = &quot;&quot;))), strand = rep(&quot;*&quot;, times = 5))
 &gt; 
 &gt; gr_S1</code></pre>
 <pre><code>## GRanges object with 5 ranges and 0 metadata columns:
@@ -432,10 +464,10 @@ Graphic representation of the GRanges objects created above.
 ##   -------
 ##   seqinfo: 2 sequences from an unspecified genome; no seqlengths</code></pre>
 <pre class="r"><code>&gt; # Sample 2
-&gt; gr_S2 &lt;- GRanges(seqnames = Rle(c(&quot;chr2&quot;, &quot;chr3&quot;), 
-+     c(3, 5)), ranges = IRanges(start = c(1:8), width = 10, 
-+     names = c(paste(&quot;Region_&quot;, 1:8, sep = &quot;&quot;))), strand = Rle(strand(c(&quot;*&quot;)), 
-+     c(8)))
+&gt; gr_S2 &lt;- GRanges(seqnames = rep(c(&quot;chr2&quot;, &quot;chr3&quot;), 
++     times = c(3, 5)), ranges = IRanges(start = c(1:8), 
++     width = 10, names = c(paste(&quot;Region_&quot;, 1:8, sep = &quot;&quot;))), 
++     strand = rep(&quot;*&quot;, times = 8))
 &gt; 
 &gt; gr_S2</code></pre>
 <pre><code>## GRanges object with 8 ranges and 0 metadata columns:
@@ -543,52 +575,11 @@ Graphic representation of the GRanges objects created above.
 <pre class="r"><code>&gt; elementNROWS(list_ranges)</code></pre>
 <pre><code>## Sample1 Sample2 
 ##       5       8</code></pre>
-<p>To append two <code>GRangesList</code> object simply use the R concatenate command <code>c</code>:</p>
-<pre class="r"><code>&gt; # Append GRangesList Sample 3
-&gt; gr_S3 &lt;- GRanges(seqnames = Rle(c(&quot;chr1&quot;, &quot;chr2&quot;), 
-+     c(3, 2)), ranges = IRanges(start = 20:24, width = 8, 
-+     names = c(paste(&quot;Region_&quot;, 1:5, sep = &quot;&quot;))), strand = Rle(strand(c(&quot;*&quot;)), 
-+     c(5)))
-&gt; 
-&gt; gr_S1</code></pre>
-<pre><code>## GRanges object with 5 ranges and 0 metadata columns:
-##            seqnames    ranges strand
-##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
-##   Region_1     chr1  [ 5, 11]      *
-##   Region_2     chr1  [ 8, 15]      *
-##   Region_3     chr1  [20, 26]      *
-##   Region_4     chr2  [ 8, 16]      *
-##   Region_5     chr2  [18, 21]      *
-##   -------
-##   seqinfo: 2 sequences from an unspecified genome; no seqlengths</code></pre>
-<pre class="r"><code>&gt; # Sample 4
-&gt; gr_S4 &lt;- GRanges(seqnames = Rle(c(&quot;chr2&quot;, &quot;chr3&quot;), 
-+     c(3, 5)), ranges = IRanges(start = 20:27, width = 10, 
-+     names = c(paste(&quot;Region_&quot;, 1:8, sep = &quot;&quot;))), strand = Rle(strand(c(&quot;*&quot;)), 
-+     c(8)))
-&gt; 
-&gt; gr_S4</code></pre>
-<pre><code>## GRanges object with 8 ranges and 0 metadata columns:
-##            seqnames    ranges strand
-##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
-##   Region_1     chr2  [20, 29]      *
-##   Region_2     chr2  [21, 30]      *
-##   Region_3     chr2  [22, 31]      *
-##   Region_4     chr3  [23, 32]      *
-##   Region_5     chr3  [24, 33]      *
-##   Region_6     chr3  [25, 34]      *
-##   Region_7     chr3  [26, 35]      *
-##   Region_8     chr3  [27, 36]      *
-##   -------
-##   seqinfo: 2 sequences from an unspecified genome; no seqlengths</code></pre>
-<pre class="r"><code>&gt; # Second GRanges List
-&gt; list_ranges2 &lt;- GRangesList(Sample3 = gr_S3, Sample4 = gr_S4)</code></pre>
-<pre class="r"><code>&gt; append_lists &lt;- c(list_ranges, list_ranges2)</code></pre>
 </div>
 <div id="subsetting-and-looping-over-granges-list" class="section level2">
 <h2>Subsetting and looping over <code>Granges</code> list</h2>
 <p>Add an extra column to every <code>GRanges</code> in the <code>GRangesList</code>.</p>
-<pre class="r"><code>&gt; addCols &lt;- lapply(append_lists, function(x) {
+<pre class="r"><code>&gt; addCols &lt;- lapply(list_ranges, function(x) {
 +     elementMetadata(x) &lt;- data.frame(NumberReads = rbinom(length(x), 
 +         size = 100, prob = 0.5))
 +     return(x)
@@ -606,11 +597,11 @@ Graphic representation of the GRanges objects created above.
 <pre><code>## GRanges object with 5 ranges and 1 metadata column:
 ##            seqnames    ranges strand | NumberReads
 ##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |   &lt;integer&gt;
-##   Region_1     chr1  [ 5, 11]      * |          55
-##   Region_2     chr1  [ 8, 15]      * |          60
-##   Region_3     chr1  [20, 26]      * |          58
-##   Region_4     chr2  [ 8, 16]      * |          46
-##   Region_5     chr2  [18, 21]      * |          50
+##   Region_1     chr1  [ 5, 11]      * |          45
+##   Region_2     chr1  [ 8, 15]      * |          61
+##   Region_3     chr1  [20, 26]      * |          49
+##   Region_4     chr2  [ 8, 16]      * |          57
+##   Region_5     chr2  [18, 21]      * |          58
 ##   -------
 ##   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 <pre class="r"><code>&gt; addCols[&quot;Sample1&quot;]</code></pre>
@@ -619,11 +610,11 @@ Graphic representation of the GRanges objects created above.
 ## GRanges object with 5 ranges and 1 metadata column:
 ##            seqnames    ranges strand | NumberReads
 ##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |   &lt;integer&gt;
-##   Region_1     chr1  [ 5, 11]      * |          55
-##   Region_2     chr1  [ 8, 15]      * |          60
-##   Region_3     chr1  [20, 26]      * |          58
-##   Region_4     chr2  [ 8, 16]      * |          46
-##   Region_5     chr2  [18, 21]      * |          50
+##   Region_1     chr1  [ 5, 11]      * |          45
+##   Region_2     chr1  [ 8, 15]      * |          61
+##   Region_3     chr1  [20, 26]      * |          49
+##   Region_4     chr2  [ 8, 16]      * |          57
+##   Region_5     chr2  [18, 21]      * |          58
 ## 
 ## -------
 ## seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
@@ -634,11 +625,11 @@ Graphic representation of the GRanges objects created above.
 ## GRanges object with 5 ranges and 1 metadata column:
 ##            seqnames    ranges strand | NumberReads
 ##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |   &lt;integer&gt;
-##   Region_1     chr1  [ 5, 11]      * |          55
-##   Region_2     chr1  [ 8, 15]      * |          60
-##   Region_3     chr1  [20, 26]      * |          58
-##   Region_4     chr2  [ 8, 16]      * |          46
-##   Region_5     chr2  [18, 21]      * |          50
+##   Region_1     chr1  [ 5, 11]      * |          45
+##   Region_2     chr1  [ 8, 15]      * |          61
+##   Region_3     chr1  [20, 26]      * |          49
+##   Region_4     chr2  [ 8, 16]      * |          57
+##   Region_5     chr2  [18, 21]      * |          58
 ## 
 ## -------
 ## seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
@@ -648,11 +639,11 @@ Graphic representation of the GRanges objects created above.
 ## GRanges object with 5 ranges and 1 metadata column:
 ##            seqnames    ranges strand | NumberReads
 ##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |   &lt;integer&gt;
-##   Region_1     chr1  [ 5, 11]      * |          55
-##   Region_2     chr1  [ 8, 15]      * |          60
-##   Region_3     chr1  [20, 26]      * |          58
-##   Region_4     chr2  [ 8, 16]      * |          46
-##   Region_5     chr2  [18, 21]      * |          50
+##   Region_1     chr1  [ 5, 11]      * |          45
+##   Region_2     chr1  [ 8, 15]      * |          61
+##   Region_3     chr1  [20, 26]      * |          49
+##   Region_4     chr2  [ 8, 16]      * |          57
+##   Region_5     chr2  [18, 21]      * |          58
 ## 
 ## -------
 ## seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
@@ -662,92 +653,34 @@ Graphic representation of the GRanges objects created above.
 ## [1] 5
 ## 
 ## $Sample2
-## [1] 8
-## 
-## $Sample3
-## [1] 5
-## 
-## $Sample4
 ## [1] 8</code></pre>
 <pre class="r"><code>&gt; sapply(addCols, length)</code></pre>
-<pre><code>## Sample1 Sample2 Sample3 Sample4 
-##       5       8       5       8</code></pre>
-<pre class="r"><code>&gt; lapply(addCols, start)</code></pre>
-<pre><code>## $Sample1
-## [1]  5  8 20  8 18
-## 
-## $Sample2
-## [1] 1 2 3 4 5 6 7 8
-## 
-## $Sample3
-## [1] 20 21 22 23 24
-## 
-## $Sample4
-## [1] 20 21 22 23 24 25 26 27</code></pre>
-<pre class="r"><code>&gt; # Concatenate and reduce the GRangesList
-&gt; Reduce(c, addCols)</code></pre>
-<pre><code>## GRanges object with 26 ranges and 1 metadata column:
-##            seqnames    ranges strand | NumberReads
-##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |   &lt;integer&gt;
-##   Region_1     chr1  [ 5, 11]      * |          55
-##   Region_2     chr1  [ 8, 15]      * |          60
-##   Region_3     chr1  [20, 26]      * |          58
-##   Region_4     chr2  [ 8, 16]      * |          46
-##   Region_5     chr2  [18, 21]      * |          50
-##        ...      ...       ...    ... .         ...
-##   Region_4     chr3  [23, 32]      * |          50
-##   Region_5     chr3  [24, 33]      * |          50
-##   Region_6     chr3  [25, 34]      * |          57
-##   Region_7     chr3  [26, 35]      * |          49
-##   Region_8     chr3  [27, 36]      * |          57
-##   -------
-##   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
+<pre><code>## Sample1 Sample2 
+##       5       8</code></pre>
 <p>Similar considerations apply for the other functions explored above like <code>findOverlaps()</code>, <code>countOverlaps()</code>, etc…</p>
-<div id="challenge" class="section level4">
-<h4>Challenge</h4>
+<div id="challenge-2" class="section level4">
+<h4>Challenge 2</h4>
 <blockquote>
-<p>Using the code below to download the <code>cpg_islands</code> object containing the CpG islands for the Human chr21 and the <code>txdb</code> gene annotation from <code>TxDb.Hsapiens.UCSC.hg19.knownGene</code>.</p>
+<p>Use the code below to download the <code>cpg_islands</code> object containing the CpG islands for the Human chrY and the <code>txdb</code> gene annotation from <code>TxDb.Hsapiens.UCSC.hg19.knownGene</code>.</p>
 </blockquote>
-<pre class="r"><code>&gt; # Download CpG islands from UCSC
-&gt; session &lt;- rtracklayer::browserSession(&quot;UCSC&quot;)
-&gt; query &lt;- rtracklayer::ucscTableQuery(session, &quot;CpG Islands&quot;, 
-+     GRangesForUCSCGenome(&quot;hg19&quot;, &quot;chr21&quot;))
-&gt; cpg_islands &lt;- rtracklayer::getTable(query)
+<pre class="r"><code>&gt; # Download CpG islands from UCSC genome browser in
+&gt; # the same way you can extract many more genomic
+&gt; # object
+&gt; session &lt;- browserSession(&quot;UCSC&quot;)
+&gt; query &lt;- ucscTableQuery(session, &quot;CpG Islands&quot;, GRangesForUCSCGenome(&quot;hg19&quot;, 
++     &quot;chrY&quot;))
+&gt; cpg_islands &lt;- getTable(query)
 &gt; # Download genes
 &gt; txdb &lt;- TxDb.Hsapiens.UCSC.hg19.knownGene</code></pre>
 <blockquote>
 <ol style="list-style-type: decimal">
-<li>What is the class of <code>cpg_islandsGR</code>? Convert <code>cpg_islandsGR</code> to a <code>GRanges</code> object.</li>
+<li>What is the class of <code>cpg_islands</code>? Convert <code>cpg_islands</code> to a <code>GRanges</code> object.</li>
 <li>Using what you have previosly learnt, get the transcript for every gene from the <code>txdb</code> gene annotation and store them into the <code>transcriptHg19</code> object (suggestion: see <code>transcriptsBy</code>).</li>
-<li>Subset <code>transcriptHg19</code> to extract only the transcript on chr21.</li>
+<li>Subset <code>transcriptHg19</code> to extract only the transcript on chr21 (suggestion: first run unlist(transcriptHg19)).</li>
 <li>Find the nearest CpG island in <code>cpg_islandsGR</code> to every transcript in <code>transcriptHg19</code> as well as their distance.</li>
 <li>Optional: On average, every CpG island is close to how many genes?</li>
 </ol>
 </blockquote>
-</div>
-<div id="solutions" class="section level4">
-<h4>Solutions</h4>
-<pre class="r"><code>&gt; #### Solutions 1. Convert to GRanges
-&gt; cpg_islandsGR &lt;- as(cpg_islands, &quot;GRanges&quot;)
-&gt; 
-&gt; # 2. Get the transcript for every gene from the
-&gt; # `txdb`
-&gt; transcriptHg19 &lt;- transcriptsBy(txdb, by = &quot;gene&quot;)
-&gt; 
-&gt; # 3. Only select chr21
-&gt; transcriptHg19 &lt;- unlist(transcriptHg19)
-&gt; chr21 &lt;- transcriptHg19[seqnames(transcriptHg19) == 
-+     &quot;chr21&quot;, ]
-&gt; 
-&gt; # 4. Find the nearest CpG island in `cpg_islandsGR`
-&gt; # to every transcript in `transcriptHg19` as well
-&gt; # as their distance.
-&gt; chr21_cpg &lt;- distanceToNearest(chr21, cpg_islandsGR)
-&gt; 
-&gt; # 5. On average, every CpG island is close to how
-&gt; # many genes?
-&gt; mean(table(subjectHits(chr21_cpg)))</code></pre>
-<pre><code>## [1] 4.520833</code></pre>
 <p></p>
 </div>
 </div>
@@ -760,74 +693,54 @@ Graphic representation of the GRanges objects created above.
 <div id="gtf-and-gff" class="section level2">
 <h2>GTF and GFF</h2>
 <p>The <strong>GFF</strong> and <strong>GTF</strong> are the preferred format used to store annotations and their exact specification is summarised in <a href="http://www.ensembl.org/info/website/upload/gff.html">GFF/GTF File Format</a>.</p>
-<p>The function <code>rtracklayer::import()</code> is used to import all the supported data types into a <code>GRanges</code> object in R. The function recognises the format from the extension of the file but the argument <code>format</code> can be used to expliciclty define it. The function <code>rtracklayer::export()</code> works in the same way and it is used to export <code>GRanges</code> objects to files.</p>
-<pre class="r"><code>&gt; # Rtracklayer Import/Export with Rtrcaklayer Select
-&gt; # only 100 ranges
-&gt; chr21_shorter &lt;- chr21[1:100]
-&gt; rtracklayer::export(chr21_shorter, file.path(dir, &quot;transcriptHg19.gff&quot;))
-&gt; rtracklayer::export(chr21_shorter, file.path(dir, &quot;transcriptHg19.gtf&quot;))
+<p>The function <code>import()</code> is used to import all the supported data types into a <code>GRanges</code> object in R. The function recognises the format from the extension of the file but the argument <code>format</code> can be used to expliciclty define it. The function <code>export()</code> works in the same way and it is used to export <code>GRanges</code> objects to files.</p>
+<pre class="r"><code>&gt; # Rtracklayer Import/Export with Rtrcaklayer
+&gt; gr_S1</code></pre>
+<pre><code>## GRanges object with 5 ranges and 0 metadata columns:
+##            seqnames    ranges strand
+##               &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
+##   Region_1     chr1  [ 5, 11]      *
+##   Region_2     chr1  [ 8, 15]      *
+##   Region_3     chr1  [20, 26]      *
+##   Region_4     chr2  [ 8, 16]      *
+##   Region_5     chr2  [18, 21]      *
+##   -------
+##   seqinfo: 2 sequences from an unspecified genome; no seqlengths</code></pre>
+<pre class="r"><code>&gt; export(gr_S1, file.path(dir, &quot;transcriptHg19.gff&quot;))
+&gt; export(gr_S1, file.path(dir, &quot;transcriptHg19.gtf&quot;))
 &gt; 
-&gt; importHg19 &lt;- rtracklayer::import(file.path(dir, &quot;transcriptHg19.gff&quot;))
+&gt; importHg19 &lt;- import(file.path(dir, &quot;transcriptHg19.gff&quot;))
 &gt; class(importHg19)</code></pre>
 <pre><code>## [1] &quot;GRanges&quot;
 ## attr(,&quot;package&quot;)
 ## [1] &quot;GenomicRanges&quot;</code></pre>
 <pre class="r"><code>&gt; importHg19</code></pre>
-<pre><code>## GRanges object with 100 ranges and 5 metadata columns:
-##         seqnames               ranges strand |      source
-##            &lt;Rle&gt;            &lt;IRanges&gt;  &lt;Rle&gt; |    &lt;factor&gt;
-##     [1]    chr21 [47247755, 47256333]      - | rtracklayer
-##     [2]    chr21 [31661463, 31661832]      - | rtracklayer
-##     [3]    chr21 [ 9907189,  9968593]      - | rtracklayer
-##     [4]    chr21 [ 9907189,  9968593]      - | rtracklayer
-##     [5]    chr21 [ 9915250,  9968593]      - | rtracklayer
-##     ...      ...                  ...    ... .         ...
-##    [96]    chr21 [47556176, 47562655]      - | rtracklayer
-##    [97]    chr21 [47556176, 47575481]      - | rtracklayer
-##    [98]    chr21 [47556176, 47575481]      - | rtracklayer
-##    [99]    chr21 [47556694, 47575481]      - | rtracklayer
-##   [100]    chr21 [47556694, 47575481]      - | rtracklayer
-##                     type     score     phase    group
-##                 &lt;factor&gt; &lt;numeric&gt; &lt;integer&gt; &lt;factor&gt;
-##     [1] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##     [2] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##     [3] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##     [4] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##     [5] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##     ...              ...       ...       ...      ...
-##    [96] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##    [97] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##    [98] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##    [99] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
-##   [100] sequence_feature      &lt;NA&gt;      &lt;NA&gt;    chr21
+<pre><code>## GRanges object with 5 ranges and 5 metadata columns:
+##       seqnames    ranges strand |      source             type     score
+##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |    &lt;factor&gt;         &lt;factor&gt; &lt;numeric&gt;
+##   [1]     chr1  [ 5, 11]      * | rtracklayer sequence_feature      &lt;NA&gt;
+##   [2]     chr1  [ 8, 15]      * | rtracklayer sequence_feature      &lt;NA&gt;
+##   [3]     chr1  [20, 26]      * | rtracklayer sequence_feature      &lt;NA&gt;
+##   [4]     chr2  [ 8, 16]      * | rtracklayer sequence_feature      &lt;NA&gt;
+##   [5]     chr2  [18, 21]      * | rtracklayer sequence_feature      &lt;NA&gt;
+##           phase    group
+##       &lt;integer&gt; &lt;factor&gt;
+##   [1]      &lt;NA&gt;     chr1
+##   [2]      &lt;NA&gt;     chr1
+##   [3]      &lt;NA&gt;     chr1
+##   [4]      &lt;NA&gt;     chr2
+##   [5]      &lt;NA&gt;     chr2
 ##   -------
-##   seqinfo: 93 sequences (1 circular) from hg19 genome</code></pre>
+##   seqinfo: 2 sequences from an unspecified genome; no seqlengths</code></pre>
 <div id="challenge-1" class="section level4">
-<h4>Challenge</h4>
+<h4>Challenge 1</h4>
 <blockquote>
 <ol style="list-style-type: decimal">
 <li>Create a simple <code>GRanges</code> object made out of 20 ranges and export it as a <code>gff</code> file.</li>
 <li>Read the file back into R.</li>
-<li>Print the number of ranges of the <code>GRanges</code> object just imported and create a histogram of the widths of the ranges.</li>
+<li>Optional: Print the number of ranges of the <code>GRanges</code> object just imported and create a histogram of the widths of the ranges.</li>
 </ol>
 </blockquote>
-</div>
-<div id="solution" class="section level4">
-<h4>Solution</h4>
-<pre class="r"><code>&gt; #### Solution 1. Create GRanges object made of 20
-&gt; #### ranges
-&gt; exampleGR &lt;- GRanges(seqnames = Rle(&quot;chr1&quot;, 20), IRanges(start = 1:20, 
-+     width = rbinom(20, size = 100, prob = 0.6)))
-&gt; export(exampleGR, file.path(dir, &quot;exampleGR.gff&quot;))
-&gt; # 2. Read the file back into R.
-&gt; exampleGR_import &lt;- import(file.path(dir, &quot;exampleGR.gff&quot;))
-&gt; # 3. Print the number of rows of the `GRanges`
-&gt; # object just imported and create a histogram of
-&gt; # the widths of the ranges.
-&gt; length(exampleGR_import)</code></pre>
-<pre><code>## [1] 20</code></pre>
-<pre class="r"><code>&gt; hist(width(exampleGR_import))</code></pre>
-<p><img src="data:image/png;base64,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AOSIAJgjAAoEAMgRATBHABQIAJAjAmCOACgQACBHBMAcAVAgAECOCIA5AqBAAIAcEQBzBECBAAA5IgDmCIACAQByRADMEQAFAgDkiACYIwAKBADIEQEwRwAUCACQIwJgjgAoEAAgRwTAHAFQIABAjgiAOQKgQACAHBEAcwRAgQAAOSIA5giAAgEAckQAzBEABQIA5IgAmCMACgQAyBEBMEcAFAgAkCMCYI4AKBAAIEcEwBwBUCAAQI4IgDkCoEAAgBwRAHMEQIEAADkiAOYIgAIBAHJEAMwRAAUCAOSIAJgjAAoEAMgRATBHABQIAJAjAmCOACgQACBHBMAcAVAgAECOCIA5AqBAAIAcEQBzBECBAAA5IgDmCIACAQByRADMEQAFAgDkiACYIwAKBADIEQEwRwAUCACQIwJgjgAoEAAgRwTAHAFQIABAjgiAOQKgQACAHBEAcwRAgQAAOSIA5giAAgEAckQAzBEABQIA5IgAmCMACgQAyBEBMEcAFAgAkCMCYI4AKBAAIEcEwBwBUCAAQI4IgDkCoEAAgBwRAHMEQIEAADkiAOYIgAIBAHJEAMwRAAUCAOSIAJgjAAoEAMgRATBHABQIAJAjAmCOACgQACBHBMAcAVAgAECOCIA5AqBAAIAcEQBzBECBAAA5IgDmCIACAQByRADMEQAFAgDkiACYIwAKBADIEQEwRwAUCACQIwJgjgAoEAAgRwTAHAFQIABAjgiAOQKgQACAHBEAcwRAgQAAOSIA5giAAgEAckQAzBEABQIA5IgAmCMACgQAyBEBMEcAFAgAkCMCYI4AKBAAIEcEwBwBUCAAQI4IgDkCoEAAgBwRAHMEQIEAADkiAOYIgAIBAHJEAMwRAAUCAOSIAJgjAAoEAMgRATBHABQIAJAjAmCOACgQACBHBMAcAVAgAECOCIA5AqBAAIAcEQBzBECBAAA5IgDmCIACAQByRADMEQAFAgDkiACYIwAKBADIEQEwRwAUCACQIwJgjgAoEAAgRwTAHAFQIABAjgiAOQKgQACAHBEAcwRAgQAAOSIA5giAAgEAckQAzBEABQIA5IgAmCMACgQAyBEBMEcAFAgAkCMCYI4AKBAAIEcEwBwBUCAAQI4IgDkCoEAAgBwRAHMEQIEAADkiAOYIgAIBAHJEAMwRAAUCAOSIAJgjAAoEAMgRATBHABQIAJAjAmCO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AfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYCYIcAKBAAfwRAgQBkIgB2CIACAfBHABQIQCYC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QnrupQR3dxcCEIoV68mm6f+HDxT5avlL9ybS+a94xoLxMnZx65uiD5r2e/dkkb+kV35E5IK2jazoujeU1WvOucTd3YUABKP8X+C9oicjlpUfGE2Mz0rwfZFtojemL91H5JT2Dq7Amvb7qSLr3hVds/RkkQ04Eln5u8h7ay9zd3cgAMFYvr3ImANPnreeSNdv4jkr9xRZ/4zLz95EZDOOQ1aa9vvibUU6djvupA+uLTLy9nYPr7jObvjvFXd3BwIQjud3TM9IsOYN6ZxX3pLO2eLJto6s2Jr2+4J9KueGmPbn9g6t0Mp37nvrZnB3b0YAArLiij0mdIx54zkLqnNWXrXHhM6xO13IX8m21Lzf/3j47JEda771ktczboW+WbaaDF9WP4u7exMCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCAACBIgAAECgCgLabJY13w8Y5zUtEVrx52ENmg+p16xX/PXfvDUfK8HXf/Lm/98yUHp1r73HR66u26j54aOhbVtqsGUVCANB2LQNw0mGHtVoicpYcbzuw+tE4PX9YV8+x/s3/qMyWehvdvwqrXiXVXXacnNO/a0YREQC0XcsAVK9wHicfHj7qBeORZWw9cdeU6Pi+8Ts/sO9WQ8oTI36azhcZe3DioL2nlq+Y8Zp61X0c63MjRzzSv6tGAREAtN1Lzz/fMMcrAO+STxoPrH40DveNE1n9C0/F0wu+sZbI0D8mV4jMqi7U/dPVRC50r6D5W++jnrEeI/v076pRQAQAA5BPAO4UeTDX0TRbPFNkx6erF5/aRGT2iniyNgCl0vki7zIcX62esf5H5O6cNopBiwBgAPIJwLtlt3xH0+w0kW0W1Vy+f4jIL+Kp+gA8I/IGs9HVqxnrTvLenDaKQYsAIC/7ivy/eOIKEfl3PPV5kZNr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" width="768" /></p>
 </div>
 </div>
 <div id="wiggle-wig-and-bigwig-file-formats-for-graphing-tracks" class="section level2">
@@ -854,10 +767,10 @@ Graphic representation of the GRanges objects created above.
 11
 22
 33</code></pre>
-<p>The <a href="https://genome.ucsc.edu/goldenpath/help/wiggle.html">bigWig</a> file is created from a <em>WIG</em> file and in <code>R</code> this can be achieved through <code>rtracklayer::wigToBigWig()</code>. <em>bigWig</em> is the recommended format for very large data tracks due to the way in which data are compressed and stored in an indexed binary format. Usually whole-genome coverage vectors are stored as <em>bigWig</em>. Howver, the loss is negligible when dealing with very large amount of data.</p>
+<p>The <a href="https://genome.ucsc.edu/goldenpath/help/wiggle.html">bigWig</a> file is created from a <em>WIG</em> file and in <code>R</code> this can be achieved through <code>wigToBigWig()</code>. <em>bigWig</em> is the recommended format for very large data tracks due to the way in which data are compressed and stored in an indexed binary format. Usually whole-genome coverage vectors are stored as <em>bigWig</em>. Howver, the loss is negligible when dealing with very large amount of data.</p>
 <pre class="r"><code>&gt; ## Wiggle (WIG) and bigWIG Import
 &gt; wig_path &lt;- file.path(dir, &quot;exampleWIG.wig&quot;)
-&gt; import_wig &lt;- rtracklayer::import(con = wig_path, seqinfo = Seqinfo(genome = &quot;mm10&quot;))
+&gt; import_wig &lt;- import(con = wig_path, seqinfo = Seqinfo(genome = &quot;mm10&quot;))
 &gt; import_wig</code></pre>
 <pre><code>## GRanges object with 16 ranges and 1 metadata column:
 ##        seqnames           ranges strand |     score
@@ -875,7 +788,7 @@ Graphic representation of the GRanges objects created above.
 ##   [16]     chr4 [500601, 500601]      * |        20
 ##   -------
 ##   seqinfo: 66 sequences (1 circular) from mm10 genome</code></pre>
-<pre class="r"><code>&gt; `?`(GenomeInfoDb::Seqinfo)
+<pre class="r"><code>&gt; `?`(Seqinfo)
 &gt; seqinfo(import_wig)</code></pre>
 <pre><code>## Seqinfo object with 66 sequences (1 circular) from mm10 genome:
 ##   seqnames       seqlengths isCircular genome
@@ -892,9 +805,8 @@ Graphic representation of the GRanges objects created above.
 ##   chrUn_JH584304     114452      FALSE   mm10</code></pre>
 <p>Convert the <em>WIG</em> file into a <em>bigWig</em> file and import the <em>bigWig</em> file into R.</p>
 <pre class="r"><code>&gt; bigwig_path &lt;- file.path(dir, &quot;example_wigToBigWig.bw&quot;)
-&gt; rtracklayer::wigToBigWig(wig_path, dest = bigwig_path, 
-+     seqinfo = seqinfo(import_wig))
-&gt; import_bigwig &lt;- rtracklayer::import(con = bigwig_path)</code></pre>
+&gt; wigToBigWig(wig_path, dest = bigwig_path, seqinfo = seqinfo(import_wig))
+&gt; import_bigwig &lt;- import(con = bigwig_path)</code></pre>
 </div>
 <div id="import-only-a-region-of-the-bigwig-file" class="section level2">
 <h2>Import only a region of the bigWig file</h2>
@@ -902,8 +814,7 @@ Graphic representation of the GRanges objects created above.
 <pre class="r"><code>&gt; # Define a region
 &gt; which_region &lt;- GRanges(seqnames = &quot;chr3&quot;, IRanges(start = 1, 
 +     end = 5e+05))
-&gt; import_bigwig_region &lt;- rtracklayer::import(con = bigwig_path, 
-+     which = which_region)</code></pre>
+&gt; import_bigwig_region &lt;- import(con = bigwig_path, which = which_region)</code></pre>
 </div>
 </div>
 <div id="liftover-from-different-genome-releases" class="section level1">
@@ -956,7 +867,7 @@ Graphic representation of the GRanges objects created above.
 ##   AH14220 | hg18ToHg19.over.chain.gz</code></pre>
 <pre class="r"><code>&gt; chain &lt;- ahub.chain[ahub.chain$title == &quot;hg19ToHg18.over.chain.gz&quot;]
 &gt; chain &lt;- chain[[1]]
-&gt; gr.hg18 &lt;- rtracklayer::liftOver(import_bigwig, chain)
+&gt; gr.hg18 &lt;- liftOver(import_bigwig, chain)
 &gt; gr.hg18</code></pre>
 <pre><code>## GRangesList object of length 16:
 ## [[1]] 
@@ -1050,10 +961,18 @@ Graphic representation of the GRanges objects created above.
 ## [6]   100 CGTCCTCGCGAGGCCCCCCGGCCGGCCGTCC...CTGGTTGATCCTGCCAGTAGCATTTGCTTGT</code></pre>
 <pre class="r"><code>&gt; head(region1$isize)</code></pre>
 <pre><code>## [1] 146 144 162 162 145 158</code></pre>
-<p><code>GenomicAlignments::readGAlignments</code> also loads <em>BAM</em> files into R directly into a <code>GRanges</code> object. The parameters are specified as in <code>RSamtools</code> with the argument <code>param</code>.</p>
+<p><code>readGAlignments</code> also loads <em>BAM</em> files into R directly into a <code>GRanges</code> object. The parameters are specified as in <code>RSamtools</code> with the argument <code>param</code>.</p>
 <pre class="r"><code>&gt; # GenomicAlignments
-&gt; readsGA &lt;- GenomicAlignments::readGAlignments(bamfile, 
-+     param = param)</code></pre>
+&gt; readsGA &lt;- readGAlignments(bamfile, param = param)</code></pre>
+<div id="challenge-3" class="section level4">
+<h4>Challenge 3</h4>
+<blockquote>
+<ol style="list-style-type: decimal">
+<li>Define a new <code>ScanBamParam()</code> object that satisfies the following options: use the same ranges as above, load both main alignments and PCR duplicates, properly paired and uniquely mapped reads.<br /></li>
+<li>Plot an histogram of the fragment sizes of every read (Suggestion: look for the <code>isize</code> fields)</li>
+</ol>
+</blockquote>
+</div>
 </div>
 <div id="compute-number-of-reads-that-falls-within-100bp-bins" class="section level2">
 <h2>Compute number of reads that falls within 100bp bins</h2>
@@ -1074,37 +993,6 @@ Graphic representation of the GRanges objects created above.
 &gt; # Add extra column to the ranges object
 &gt; binned_counts &lt;- ranges(rangeViews)
 &gt; values(binned_counts) &lt;- data.frame(ReadCounts = bin_sum)</code></pre>
-<div id="challenge-2" class="section level4">
-<h4>Challenge</h4>
-<blockquote>
-<ol style="list-style-type: decimal">
-<li>Define a new <code>ScanBamParam()</code> object that satisfies the following options: use the same ranges as above, load both main alignments and PCR duplicates, properly paired and uniquely mapped reads.<br /></li>
-<li>Plot an histogram of the fragment sizes of every read (Suggestion: look for the <code>isize</code> fields)</li>
-</ol>
-</blockquote>
-</div>
-<div id="solution-1" class="section level4">
-<h4>Solution</h4>
-<pre class="r"><code>&gt; # 1.  Path to the bamfile. In the same folder there
-&gt; # has to be the chr1.bam.bai file
-&gt; bamfile &lt;- file.path(dir, &quot;chr21.bam&quot;)
-&gt; # Define parameters
-&gt; which &lt;- GRanges(seqnames = rep(&quot;chr21&quot;, 3), IRanges(start = c(9827000, 
-+     16267000, 15890000), width = 10000))
-&gt; what &lt;- c(&quot;rname&quot;, &quot;strand&quot;, &quot;pos&quot;, &quot;qwidth&quot;, &quot;seq&quot;, 
-+     &quot;isize&quot;)
-&gt; # ?scanBamFlag
-&gt; flag = scanBamFlag(isDuplicate = NA, isProperPair = TRUE, 
-+     isPaired = TRUE)
-&gt; 
-&gt; param &lt;- ScanBamParam(which = which, what = what, flag = flag)
-&gt; # load reads into R
-&gt; reads = scanBam(bamfile, param = param)
-&gt; 
-&gt; # 2.
-&gt; hist(reads$`chr21:16267000-16276999`$isize)</code></pre>
-<p><img src="data:image/png;base64,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gGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJgCwGAYnqQBMA5AmALAYBiepAEwDkCYAsBgGJ6kATAOQJg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" width="768" /></p>
-</div>
 </div>
 </div>
 
