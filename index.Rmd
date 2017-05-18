@@ -35,7 +35,15 @@ Participants in this workshop will need to download the files listed above, or
 git clone https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne.git
 ```
 
+[GitHub repository](https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne)
+
 ---
 
-[GitHub repository](https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne)
+These notes were developed by:
+
+* Soroor Hediyeh-Zadeh
+* Anna Qualieri
+* Paul Harrison
+
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="CC-BY.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
