@@ -26,18 +26,50 @@ Files:
 * [AdvGRanges_Rtracklayer_Rsamtools.Rmd](AdvGRanges_Rtracklayer_Rsamtools.Rmd)
 * [chr21.bam](chr21.bam)
 * [chr21.bam.bai](chr21.bam.bai)
+* [exampleWIG.wig](exampleWIG.wig)
 
----
 
-Participants in this workshop will need to download the files listed above, or
+## Setup
+
+Participants in this workshop will need to download the files listed above, or clone the 
+[GitHub repository](https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne):
 
 ```
 git clone https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne.git
 ```
 
-[GitHub repository](https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne)
+You will also need to install Bioconductor packages:
 
----
+```{r eval=FALSE}
+# Install necessary Bioconductor packages:
+source("http://www.bioconductor.org/biocLite.R")
+biocLite(c(
+# Software packages
+    "BioBase",
+    "GenomicRanges",
+    "Biostrings", 
+    "BSgenome", 
+    "SummarizedExperiment",
+    "AnnotationHub",
+    "GEOquery",
+    "rtracklayer",
+    "seqLogo",
+# Annotation packages
+    "BSgenome.Scerevisiae.UCSC.sacCer3",
+    "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
+    "TxDb.Hsapiens.UCSC.hg19.knownGene",
+    "org.Hs.eg.db",
+    "hgu95av2.db",
+# Experiment data packages
+    "ALL",
+    "airway"
+))
+
+# And one CRAN package:
+install.packages("ggplot2")
+```
+
+## Authors
 
 These notes were developed by:
 
@@ -46,4 +78,6 @@ These notes were developed by:
 * Paul Harrison
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="CC-BY.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+
+[GitHub repository](https://github.com/COMBINE-Australia/2017-05-19-bioconductor-melbourne)
 
